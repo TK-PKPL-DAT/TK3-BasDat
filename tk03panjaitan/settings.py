@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'web',
     'fitur_hijau',
+    'fitur_kuning',
 ]
 
 MIDDLEWARE = [

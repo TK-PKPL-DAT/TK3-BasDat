@@ -10,14 +10,6 @@
             background-color: #f5f5f5;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 22px;
-        }
         .dashboard-container {
             max-width: 1200px;
             margin: 40px auto;
@@ -99,7 +91,7 @@
         }
         .btn-logout-btn {
             background: white;
-            color: #667eea;
+            color: #000000;
             border: none;
             padding: 8px 16px;
             border-radius: 5px;
@@ -109,18 +101,13 @@
         }
         .btn-logout-btn:hover {
             background: #f0f0f0;
-            color: #764ba2;
+            color: #333333;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">🎫 TikTakTuk</a>
-            <span class="navbar-text text-white flex-grow-1"></span>
-            <a href="{% url 'logout' %}" class="btn-logout-btn">Logout</a>
-        </div>
-    </nav>
+    <!-- Header Template -->
+    {% include 'header.html' %}
 
     <div class="dashboard-container">
         <div class="welcome-section">
@@ -134,10 +121,16 @@
         </div>
 
         <div class="features-section">
-            <a href="#" class="feature-card">
-                <div class="feature-icon">📋</div>
-                <h4>Fitur 1</h4>
-                <p>Deskripsi fitur akan muncul di sini</p>
+            <a href="{% url 'fitur_kuning:venue_list' %}" class="feature-card">
+                <div class="feature-icon">🏢</div>
+                <h4>Manajemen Venue</h4>
+                <p>Kelola lokasi pertunjukan dan kapasitas tempat duduk</p>
+            </a>
+            
+            <a href="{% url 'fitur_kuning:event_list' %}" class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h4>Jelajahi Acara</h4>
+                <p>Temukan dan kelola semua acara yang tersedia</p>
             </a>
             
             <a href="#" class="feature-card">
