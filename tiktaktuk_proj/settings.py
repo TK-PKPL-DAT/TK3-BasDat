@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
+import dj_database_url 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,14 +75,9 @@ WSGI_APPLICATION = 'tiktaktuk_proj.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tiktaktuk',
-        'USER': 'dery', # Sesuaikan dengan dery atau postgres
-        'PASSWORD': 'dery', # Sesuaikan password lo
-        'HOST': 'db', # Ini nama service di docker-compose
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://neondb_owner:npg_IkZTWUNml2B4@ep-nameless-breeze-a1r89uxe.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
+    )
 }
 
 
