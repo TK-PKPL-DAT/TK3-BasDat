@@ -1,9 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ mode }} Kategori Tiket</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ mode }} Kategori Tiket - TikTakTuk</title> 
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen p-6">
+<body class="bg-slate-50 flex flex-col items-center justify-center min-h-screen p-6">
+    
+    {% if messages %}
+    <div class="max-w-md w-full mb-6">
+        {% for message in messages %}
+            <div class="p-4 rounded-2xl bg-red-100 text-red-600 font-bold shadow-sm border border-red-200">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="max-w-md w-full bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
         <h2 class="text-2xl font-black text-slate-800 mb-8">{{ mode }} Kategori</h2>
         
@@ -12,33 +24,40 @@
             <div class="space-y-5">
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Acara</label>
-                    <select name="event_id" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold appearance-none">
-                        {% for ev in events %}
-                        <option value="{{ ev.0 }}" {% if ev.0 == selected_event_id %}selected{% endif %}>
-                            {{ ev.1 }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="relative">
+                        <select name="event_id" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold appearance-none cursor-pointer">
+                            {% for ev in events %}
+                            <option value="{{ ev.0 }}" {% if ev.0 == selected_event_id %}selected{% endif %}>
+                                {{ ev.1 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Kategori</label>
-                    <input type="text" name="name" value="{{ data.0|default:'' }}" placeholder="cth: VVIP" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold" required>
+                    <input type="text" name="name" value="{{ data.0|default:'' }}" placeholder="cth: VVIP, Festival, Tribune" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold transition-all" required>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Harga (Rp)</label>
-                        <input type="number" name="price" value="{{ data.2|default:'' }}" placeholder="750000" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold" required>
+                        <input type="number" name="price" value="{{ data.2|default:'' }}" placeholder="750000" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold transition-all" required>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Kuota</label>
-                        <input type="number" name="quota" value="{{ data.1|default:'' }}" placeholder="100" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold" required>
+                        <input type="number" name="quota" value="{{ data.1|default:'' }}" placeholder="100" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 font-bold transition-all" required>
                     </div>
                 </div>
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black mt-10 shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all uppercase tracking-widest">
+
+            <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black mt-10 shadow-lg shadow-blue-100 hover:bg-blue-700 hover:-translate-y-1 transition-all uppercase tracking-widest">
                 {{ mode }} Kategori
             </button>
-            <a href="{% url 'fitur_hijau:list_ticket' %}" class="block text-center mt-6 text-slate-300 font-bold text-xs uppercase tracking-widest hover:text-slate-500">Batal</a>
+            
+            <a href="{% url 'fitur_hijau:list_ticket' %}" class="block text-center mt-6 text-slate-300 font-bold text-xs uppercase tracking-widest hover:text-slate-500 transition-colors">Batal</a>
         </form>
     </div>
 </body>

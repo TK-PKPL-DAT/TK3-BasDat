@@ -3,7 +3,6 @@ from django.contrib import messages
 from .models import UserAccount, Role, Customer, Organizer, AccountRole
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
 import uuid
-import hashlib
 
 
 def test_db_view(request):
@@ -56,16 +55,15 @@ def register_form_view(request):
         form = form_class(request.POST)
         if form.is_valid():
             try:
-                # Hash password
+                # Ambil password tanpa di-hash
                 password = form.cleaned_data['password']
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
                 username = form.cleaned_data['username']
                 
-                # Buat UserAccount
+                # Buat UserAccount dengan password plain text
                 user = UserAccount.objects.create(
                     user_id=uuid.uuid4(),
                     username=username,
-                    password=password_hash
+                    password=password
                 )
                 
                 # Get atau create role
@@ -128,19 +126,9 @@ def register_form_view(request):
 
 def verify_password(stored_password, input_password):
     """
-    Verifikasi password yang support kedua jenis:
-    - Password yang sudah di-hash (SHA256)
-    - Password plain text (dari SQL manual)
+    Verifikasi password plain text
     """
-    password_hash = hashlib.sha256(input_password.encode()).hexdigest()
-    
-    # Cek apakah stored password adalah SHA256 hash (64 karakter)
-    if len(stored_password) == 64 and all(c in '0123456789abcdef' for c in stored_password.lower()):
-        # Password sudah di-hash, bandingkan dengan hash
-        return stored_password == password_hash
-    else:
-        # Password plain text, bandingkan langsung
-        return stored_password == input_password
+    return stored_password == input_password
 
 
 def login_view(request):
@@ -157,10 +145,16 @@ def login_view(request):
                 
                 # Verifikasi password (support hash dan plain text)
                 if verify_password(user.password, password):
+                    # Ambil role user
+                    account_role = AccountRole.objects.filter(user_id=user.user_id).first()
+                    role_obj = account_role.role if account_role else None
+                    role_name = role_obj.role_name if role_obj else 'unknown'
+                    
                     # Set session
                     request.session['user_id'] = str(user.user_id)
                     request.session['username'] = user.username
                     request.session['logged_in'] = True
+                    request.session['role'] = role_name  # Set role di session
                     
                     messages.success(request, f'Login berhasil! Selamat datang, {username}')
                     return redirect('dashboard')
