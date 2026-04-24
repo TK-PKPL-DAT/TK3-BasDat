@@ -25,7 +25,7 @@ def register_form_view(request):
     valid_roles = ['customer', 'organizer', 'admin']
     if role not in valid_roles:
         messages.error(request, 'Role tidak valid!')
-        return redirect('register')
+        return redirect('web:register')
     
     # Tentukan form dan informasi role
     role_info = {
@@ -97,8 +97,13 @@ def register_form_view(request):
                         user_id=user.user_id
                     )
                 
+                elif role == 'admin':
+                    # Admin hanya perlu UserAccount dan AccountRole
+                    # Tidak perlu record tambahan di tabel admin
+                    pass
+                
                 messages.success(request, f'Registrasi {info["title"]} berhasil! Silakan login.')
-                return redirect('login')
+                return redirect('web:login')
                 
             except Exception as e:
                 messages.error(request, f'Error: {str(e)}')
@@ -121,6 +126,23 @@ def register_form_view(request):
     return render(request, 'register_form.html', context)
 
 
+def verify_password(stored_password, input_password):
+    """
+    Verifikasi password yang support kedua jenis:
+    - Password yang sudah di-hash (SHA256)
+    - Password plain text (dari SQL manual)
+    """
+    password_hash = hashlib.sha256(input_password.encode()).hexdigest()
+    
+    # Cek apakah stored password adalah SHA256 hash (64 karakter)
+    if len(stored_password) == 64 and all(c in '0123456789abcdef' for c in stored_password.lower()):
+        # Password sudah di-hash, bandingkan dengan hash
+        return stored_password == password_hash
+    else:
+        # Password plain text, bandingkan langsung
+        return stored_password == input_password
+
+
 def login_view(request):
     """View untuk halaman login"""
     if request.method == 'POST':
@@ -130,22 +152,23 @@ def login_view(request):
             password = form.cleaned_data['password']
             
             try:
-                # Hash password untuk perbandingan
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
+                user = UserAccount.objects.get(username=username)
                 
-                # Cari user
-                user = UserAccount.objects.get(
-                    username=username,
-                    password=password_hash
-                )
-                
-                # Set session
-                request.session['user_id'] = str(user.user_id)
-                request.session['username'] = user.username
-                request.session['logged_in'] = True
-                
-                messages.success(request, f'Login berhasil! Selamat datang, {username}')
-                return redirect('dashboard')
+                if verify_password(user.password, password):
+                    # --- BAGIAN PENTING: Ambil Role buat Fitur Hijau ---
+                    account_role = AccountRole.objects.filter(user_id=user.user_id).first()
+                    role_name = account_role.role.role_name.lower() if account_role else 'guest'
+
+                    # Set session
+                    request.session['user_id'] = str(user.user_id)
+                    request.session['username'] = user.username
+                    request.session['role'] = role_name  # Simpan role di sini!
+                    request.session['logged_in'] = True
+                    
+                    messages.success(request, f'Login berhasil! Selamat datang, {username}')
+                    return redirect('web:dashboard')
+                else:
+                    messages.error(request, 'Username atau password salah!')
                 
             except UserAccount.DoesNotExist:
                 messages.error(request, 'Username atau password salah!')
@@ -154,12 +177,11 @@ def login_view(request):
     
     return render(request, 'login.html', {'form': form})
 
-
 def logout_view(request):
     """View untuk logout"""
     request.session.flush()
     messages.success(request, 'Logout berhasil!')
-    return redirect('login')
+    return redirect('web:login')
 
 
 def dashboard_view(request):
@@ -167,7 +189,7 @@ def dashboard_view(request):
     # Cek apakah user sudah login
     if not request.session.get('logged_in'):
         messages.warning(request, 'Silakan login terlebih dahulu!')
-        return redirect('login')
+        return redirect('web:login')
     
     try:
         user_id = request.session.get('user_id')
@@ -188,4 +210,4 @@ def dashboard_view(request):
     except UserAccount.DoesNotExist:
         request.session.flush()
         messages.error(request, 'User tidak ditemukan!')
-        return redirect('login')
+        return redirect('web:login')

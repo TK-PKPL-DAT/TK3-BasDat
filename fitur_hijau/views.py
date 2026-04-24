@@ -3,60 +3,52 @@ from django.db import connection
 from django.contrib import messages
 from web.models import AccountRole, Role 
 
-def get_role(request):
-    """
-    Mengambil role beneran dari database berdasarkan user_id di session Jarred.
-    """
-    user_id = request.session.get('user_id')
-    if not user_id:
-        return 'guest'
-
-    try:
-       
-        account_role = AccountRole.objects.filter(user_id=user_id).first()
-        if account_role and account_role.role:
-         
-            return account_role.role.role_name.lower()
-    except Exception:
-        pass
-    return 'guest'
+# --- HELPER FUNCTIONS ---
 
 def is_logged_in(request):
-    return request.session.get('logged_in', False)
+    """Cek apakah user_id ada di session (tanda sudah login dari folder web)"""
+    return 'user_id' in request.session
+
+def get_role(request):
+    """Mengambil role name langsung dari session yang di-set saat login"""
+    return request.session.get('role', 'guest').lower()
 
 # --- ARTIST LOGIC ---
+
 def list_artist(request):
-   
+    """READ: Menampilkan daftar artis (Bisa diakses semua user yang login)"""
     if not is_logged_in(request):
         return redirect('web:login')
         
     role = get_role(request)
     with connection.cursor() as cursor:
+        # Menggunakan skema tiktaktuk sesuai struktur database lo
         cursor.execute("SELECT artist_id, name, genre FROM tiktaktuk.artist ORDER BY name ASC")
         artis = cursor.fetchall()
     
- 
     return render(request, 'fitur_hijau/list_artist.html', {
         'artis': artis, 
         'user_role': role, 
-        'is_admin': role == 'admin'
+        'is_admin': role == 'admin' # Digunakan untuk filter tombol CUD di HTML
     })
 
 def create_artist(request):
-    # CUD: Cuma ADMIN
+    """CREATE: Menambah artis baru (Hanya Admin)"""
     if get_role(request) != 'admin':
         messages.error(request, "Akses ditolak! Cuma Admin yang bisa kelola Artist.")
         return redirect('fitur_hijau:list_artist')
 
     if request.method == 'POST':
-        name, genre = request.POST.get('name'), request.POST.get('genre')
+        name = request.POST.get('name')
+        genre = request.POST.get('genre')
         with connection.cursor() as cursor:
             cursor.execute("INSERT INTO tiktaktuk.artist (name, genre) VALUES (%s, %s)", [name, genre])
+        messages.success(request, f"Artist {name} berhasil ditambahkan!")
         return redirect('fitur_hijau:list_artist')
+        
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
 
 def update_artist(request, id):
-    # CUD: Cuma ADMIN
     if get_role(request) != 'admin':
         return redirect('fitur_hijau:list_artist')
 
@@ -64,6 +56,7 @@ def update_artist(request, id):
         if request.method == 'POST':
             name, genre = request.POST.get('name'), request.POST.get('genre')
             cursor.execute("UPDATE tiktaktuk.artist SET name=%s, genre=%s WHERE artist_id=%s", [name, genre, id])
+            messages.success(request, f"Artist {name} berhasil diperbarui!")
             return redirect('fitur_hijau:list_artist')
         
         cursor.execute("SELECT name, genre FROM tiktaktuk.artist WHERE artist_id = %s", [id])
@@ -71,15 +64,17 @@ def update_artist(request, id):
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Update', 'data': data})
 
 def delete_artist(request, id):
-    # CUD: Cuma ADMIN
+    """DELETE: Menghapus artis (Hanya Admin)"""
     if get_role(request) == 'admin':
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM tiktaktuk.artist WHERE artist_id = %s", [id])
+        messages.success(request, "Artist berhasil dihapus!")
     return redirect('fitur_hijau:list_artist')
 
 # --- TICKET LOGIC ---
+
 def list_ticket(request):
-    # READ: Bisa diakses SEMUA (asal login)
+    """READ: Menampilkan kategori tiket (Semua user yang login)"""
     if not is_logged_in(request):
         return redirect('web:login')
 
@@ -87,28 +82,37 @@ def list_ticket(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tc.category_id, tc.category_name, tc.quota, tc.price, e.event_title 
-            FROM tiktaktuk.ticket_category tc JOIN tiktaktuk.event e ON tc.tevent_id = e.event_id
+            FROM tiktaktuk.ticket_category tc 
+            JOIN tiktaktuk.event e ON tc.tevent_id = e.event_id
             ORDER BY e.event_title ASC, tc.category_name ASC
         """)
         tiket = cursor.fetchall()
     
-    # can_manage: Admin & Organizer bisa CUD
     return render(request, 'fitur_hijau/list_ticket.html', {
         'tiket': tiket, 
         'user_role': role, 
-        'can_manage': role in ['admin', 'organizer']
+        'can_manage': role in ['admin', 'organizer'] # Admin & Organizer bisa CUD tiket
     })
 
 def create_ticket(request):
-    # CUD: Admin & Organizer
+    """CREATE: Menambah kategori tiket (Admin & Organizer)"""
     if get_role(request) not in ['admin', 'organizer']:
         messages.error(request, "Cuma Admin atau Organizer yang bisa kelola Tiket.")
         return redirect('fitur_hijau:list_ticket')
 
     if request.method == 'POST':
-        name, quota, price, ev_id = request.POST.get('name'), request.POST.get('quota'), request.POST.get('price'), request.POST.get('event_id')
+        name = request.POST.get('name')
+        quota = request.POST.get('quota')
+        price = request.POST.get('price')
+        ev_id = request.POST.get('event_id')
+        
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO tiktaktuk.ticket_category (category_name, quota, price, tevent_id) VALUES (%s, %s, %s, %s)", [name, quota, price, ev_id])
+            cursor.execute("""
+                INSERT INTO tiktaktuk.ticket_category (category_name, quota, price, tevent_id) 
+                VALUES (%s, %s, %s, %s)
+            """, [name, quota, price, ev_id])
+            
+        messages.success(request, f"Kategori tiket {name} berhasil dibuat!")
         return redirect('fitur_hijau:list_ticket')
     
     with connection.cursor() as cursor:
@@ -117,18 +121,24 @@ def create_ticket(request):
     return render(request, 'fitur_hijau/form_ticket.html', {'events': events, 'mode': 'Tambah'})
 
 def update_ticket(request, id):
-    # CUD: Admin & Organizer
+    """UPDATE: Mengubah kategori tiket (Admin & Organizer)"""
     if get_role(request) not in ['admin', 'organizer']:
         return redirect('fitur_hijau:list_ticket')
     
     with connection.cursor() as cursor:
         if request.method == 'POST':
-            name, quota, price, ev_id = request.POST.get('name'), request.POST.get('quota'), request.POST.get('price'), request.POST.get('event_id')
+            name = request.POST.get('name')
+            quota = request.POST.get('quota')
+            price = request.POST.get('price')
+            ev_id = request.POST.get('event_id')
+            
             cursor.execute("""
                 UPDATE tiktaktuk.ticket_category 
                 SET category_name=%s, quota=%s, price=%s, tevent_id=%s 
                 WHERE category_id=%s
             """, [name, quota, price, ev_id, id])
+            
+            messages.success(request, f"Kategori tiket {name} berhasil diperbarui!")
             return redirect('fitur_hijau:list_ticket')
         
         cursor.execute("SELECT category_name, quota, price, tevent_id FROM tiktaktuk.ticket_category WHERE category_id = %s", [id])
@@ -144,8 +154,9 @@ def update_ticket(request, id):
     })
 
 def delete_ticket(request, id):
-    # CUD: Admin & Organizer
     if get_role(request) in ['admin', 'organizer']:
         with connection.cursor() as cursor:
+            # Pastiin nama tabel sesuai: ticket_category
             cursor.execute("DELETE FROM tiktaktuk.ticket_category WHERE category_id = %s", [id])
+        messages.success(request, "Kategori tiket berhasil dihapus!")
     return redirect('fitur_hijau:list_ticket')

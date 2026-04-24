@@ -21,12 +21,13 @@ class Order(models.Model):
 
 
 class AccountRole(models.Model):
-
+   
     role = models.ForeignKey('Role', on_delete=models.CASCADE)
     user = models.ForeignKey('UserAccount', on_delete=models.CASCADE)
 
     class Meta:
-        # Ini cara legal di Django buat bikin gabungan role & user jadi unik
+        managed = False
+        db_table = 'tiktaktuk.account_role' 
         unique_together = (('role', 'user'),)
 
 
@@ -61,14 +62,6 @@ class Event(models.Model):
     class Meta:
         managed = False
         db_table = 'event'
-
-
-class AccountRole(models.Model):
-    role = models.ForeignKey('Role', on_delete=models.CASCADE)
-    user = models.ForeignKey('UserAccount', on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = (('role', 'user'),)
 
 
 class HasRelationship(models.Model):
