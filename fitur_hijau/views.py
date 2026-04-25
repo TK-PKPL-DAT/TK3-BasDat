@@ -14,22 +14,32 @@ def get_role(request):
     return request.session.get('role', 'guest').lower()
 
 # --- ARTIST LOGIC ---
-
 def list_artist(request):
-    """READ: Menampilkan daftar artis (Bisa diakses semua user yang login)"""
+    """READ: Menampilkan daftar artis dengan statistik sesuai revisi soal"""
     if not is_logged_in(request):
         return redirect('web:login')
         
     role = get_role(request)
+    
     with connection.cursor() as cursor:
-        # Menggunakan skema tiktaktuk sesuai struktur database lo
+        # 1. Ambil data utama (Artist ID, Nama, Genre)
         cursor.execute("SELECT artist_id, name, genre FROM tiktaktuk.artist ORDER BY name ASC")
         artis = cursor.fetchall()
-    
+        
+        # 2. (Opsional) Ambil jumlah genre unik untuk Card Statistik
+        cursor.execute("SELECT COUNT(DISTINCT genre) FROM tiktaktuk.artist")
+        total_genre = cursor.fetchone()[0]
+        
+        # 3. (Opsional) Ambil jumlah total artist
+        total_artist = len(artis)
+
     return render(request, 'fitur_hijau/list_artist.html', {
         'artis': artis, 
         'user_role': role, 
-        'is_admin': role == 'admin' # Digunakan untuk filter tombol CUD di HTML
+        'is_admin': role == 'admin',
+        'total_artist': total_artist,
+        'total_genre': total_genre,
+        'total_event': 6 
     })
 
 def create_artist(request):

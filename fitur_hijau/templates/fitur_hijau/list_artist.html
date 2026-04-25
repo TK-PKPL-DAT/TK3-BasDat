@@ -8,66 +8,94 @@
     {% include 'header.html' %}
 
     <div class="max-w-6xl mx-auto p-10">
-        {% if messages %}
-        <div class="mb-6">
-            {% for message in messages %}
-                <div class="p-4 rounded-2xl {% if message.tags == 'error' %}bg-red-100 text-red-600{% else %}bg-green-100 text-green-600{% endif %} font-bold shadow-sm">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
+        
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-2xl font-black text-slate-800 tracking-tight">Daftar Artis</h1>
-                <p class="text-slate-400 text-sm italic">Mode: {{ user_role|upper }}</p>
+                <p class="text-slate-400 text-sm italic">Kelola artis yang ada di platform TikTakTuk</p>
             </div>
             {% if is_admin %}
-            <a href="{% url 'fitur_hijau:create_artist' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">
-                + Tambah Artis
+            <a href="{% url 'fitur_hijau:create_artist' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
+                + Tambah Artist
             </a>
             {% endif %}
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Artist</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_artist|default:artis|length }}</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Genre</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_genre|default:"6" }}</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tampil di Event</p>
+                <h3 class="text-3xl font-black text-slate-800">6</h3>
+            </div>
+        </div>
+
         <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="font-black text-slate-800">Tabel Artis</h2>
+                
+                <div class="relative w-64">
+                    <input type="text" placeholder="Cari nama atau genre..." 
+                           class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+            </div>
+
             <table class="w-full text-left">
-                <thead class="bg-slate-50 border-b border-slate-100">
+                <thead class="bg-slate-50">
                     <tr class="text-slate-400 text-[10px] uppercase font-black tracking-widest">
-                        <th class="px-10 py-5">Artist</th>
-                        <th class="px-10 py-5">Genre</th>
-                        {% if is_admin %}<th class="px-10 py-5 text-center">Aksi</th>{% endif %}
+                        <th class="px-8 py-4">Artist ID</th>
+                        <th class="px-8 py-4">Name (Nama Artist)</th>
+                        <th class="px-8 py-4">Genre</th>
+                        {% if is_admin %}<th class="px-8 py-4 text-center">Action</th>{% endif %}
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100">
                     {% for a in artis %}
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="px-10 py-6 font-bold text-slate-700">{{ a.1 }}</td>
-                        <td class="px-10 py-6 text-slate-400 italic text-sm">{{ a.2 }}</td>
+                        <td class="px-8 py-5 text-xs text-slate-400 font-mono">{{ a.0 }}</td>
+                        
+                        <td class="px-8 py-5 font-bold text-slate-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black uppercase">
+                                    {{ a.1|slice:":1" }}
+                                </div>
+                                {{ a.1 }}
+                            </div>
+                        </td>
+                        
+                        <td class="px-8 py-5">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase">
+                                {{ a.2 }}
+                            </span>
+                        </td>
+                        
                         {% if is_admin %}
-                        <td class="px-10 py-6 text-center">
-                            <div class="flex justify-center gap-4">
-                                <a href="{% url 'fitur_hijau:update_artist' a.0 %}" class="text-xl hover:scale-110 transition-transform" title="Edit">📝</a>
-                                <a href="{% url 'fitur_hijau:delete_artist' a.0 %}" onclick="return confirm('Hapus artist {{ a.1 }}?')" class="text-xl hover:scale-110 transition-transform" title="Hapus">🗑️</a>
+                        <td class="px-8 py-5 text-center">
+                            <div class="flex justify-center gap-3">
+                                <a href="{% url 'fitur_hijau:update_artist' a.0 %}" class="text-blue-600 font-bold text-xs hover:underline">[Update]</a>
+                                <a href="{% url 'fitur_hijau:delete_artist' a.0 %}" 
+                                   onclick="return confirm('Hapus {{ a.1 }}?')" 
+                                   class="text-red-600 font-bold text-xs hover:underline">[Delete]</a>
                             </div>
                         </td>
                         {% endif %}
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if is_admin %}3{% else %}2{% endif %}" class="px-10 py-10 text-center text-slate-400 font-bold italic">
-                            Belum ada artis terdaftar.
+                        <td colspan="{% if is_admin %}4{% else %}3{% endif %}" class="px-8 py-10 text-center text-slate-400 italic">
+                            Data artist tidak ditemukan.
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-        
-        <div class="mt-8 flex justify-center gap-6">
-            <a href="{% url 'fitur_hijau:list_ticket' %}" class="text-blue-600 font-bold hover:underline italic">
-                Kelola Kategori Tiket &rarr;
-            </a>
         </div>
     </div>
 </body>
