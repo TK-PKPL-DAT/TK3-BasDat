@@ -3,8 +3,10 @@ from django.contrib import messages
 from django.db.models import Q, Count, Min
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.db import connection  # <-- Ditambahkan untuk query raw SQL
 import uuid
-from web.models import Venue, Seat, UserAccount, AccountRole, Event, EventArtist, TicketCategory, Organizer, Artist
+# <-- EventArtist dihapus dari import list di bawah
+from web.models import Venue, Seat, UserAccount, AccountRole, Event, TicketCategory, Organizer, Artist
 from .forms import VenueSearchForm, CreateVenueForm
 
 
@@ -236,10 +238,7 @@ def delete_venue(request, venue_id):
 def event_list(request):
     """Menampilkan daftar semua event dengan search dan filter"""
     
-    # Query semua event
     events = Event.objects.all().select_related('venue', 'organizer')
-    
-    # Check user role
     is_admin_or_org = is_admin_or_organizer(request)
     user_role = get_user_role(request)
     is_logged_in = request.session.get('logged_in', False)
@@ -247,9 +246,18 @@ def event_list(request):
     # Search by event title or artist
     search_query = request.GET.get('search', '')
     if search_query:
+        # RAW SQL: Cari event_id berdasarkan nama artis yang di search
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT ea.event_id FROM event_artist ea
+                JOIN artist a ON ea.artist_id = a.artist_id
+                WHERE a.name ILIKE %s
+            """, [f'%{search_query}%'])
+            artist_event_ids = [row[0] for row in cursor.fetchall()]
+
         events = events.filter(
             Q(event_title__icontains=search_query) |
-            Q(eventartist__artist__name__icontains=search_query)
+            Q(event_id__in=artist_event_ids)
         ).distinct()
     
     # Filter by venue
@@ -260,18 +268,25 @@ def event_list(request):
     # Filter by artist
     artist_filter = request.GET.get('artist', '')
     if artist_filter:
-        events = events.filter(eventartist__artist_id=artist_filter).distinct()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT event_id FROM event_artist WHERE artist_id = %s", [artist_filter])
+            artist_event_ids = [row[0] for row in cursor.fetchall()]
+        events = events.filter(event_id__in=artist_event_ids).distinct()
     
-    # Get unique venues dan artists untuk dropdown
     all_venues = Venue.objects.all().order_by('venue_name')
     all_artists = Artist.objects.all().order_by('name')
     
-    # Enrich events dengan informasi tambahan
     events_data = []
     for event in events:
-        # Get artists untuk event ini
-        event_artists = EventArtist.objects.filter(event=event).select_related('artist')
-        artists_list = [ea.artist for ea in event_artists]
+        # RAW SQL: Ambil daftar artis untuk event ini
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT a.artist_id, a.name, a.genre 
+                FROM artist a 
+                JOIN event_artist ea ON a.artist_id = ea.artist_id 
+                WHERE ea.event_id = %s
+            """, [str(event.event_id)])
+            artists_list = [Artist(artist_id=row[0], name=row[1], genre=row[2]) for row in cursor.fetchall()]
         
         # Get ticket categories untuk event ini
         ticket_categories = TicketCategory.objects.filter(tevent=event)
@@ -301,29 +316,27 @@ def event_list(request):
 
 def event_detail(request, event_id):
     """Menampilkan detail event"""
-    
-    # Get event
     event = get_object_or_404(Event, event_id=event_id)
     
-    # Get artists untuk event ini
-    event_artists = EventArtist.objects.filter(event=event).select_related('artist')
-    artists_list = [ea.artist for ea in event_artists]
+    # RAW SQL: Ambil daftar artis
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT a.artist_id, a.name, a.genre 
+            FROM artist a 
+            JOIN event_artist ea ON a.artist_id = ea.artist_id 
+            WHERE ea.event_id = %s
+        """, [str(event.event_id)])
+        artists_list = [Artist(artist_id=row[0], name=row[1], genre=row[2]) for row in cursor.fetchall()]
     
-    # Get ticket categories untuk event ini
     ticket_categories = TicketCategory.objects.filter(tevent=event)
-    
-    # Check user role
-    is_admin_or_org = is_admin_or_organizer(request)
-    user_role = get_user_role(request)
-    is_logged_in = request.session.get('logged_in', False)
     
     context = {
         'event': event,
         'artists': artists_list,
         'categories': ticket_categories,
-        'is_admin_or_organizer': is_admin_or_org,
-        'user_role': user_role,
-        'is_logged_in': is_logged_in,
+        'is_admin_or_organizer': is_admin_or_organizer(request),
+        'user_role': get_user_role(request),
+        'is_logged_in': request.session.get('logged_in', False),
     }
     
     return render(request, 'fitur_kuning/event_detail.html', context)
@@ -332,8 +345,6 @@ def event_detail(request, event_id):
 @require_http_methods(["POST"])
 def create_event(request):
     """Membuat event baru untuk admin dan organizer"""
-    
-    # Check if user is admin or organizer
     if not is_admin_or_organizer(request):
         return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
     
@@ -343,7 +354,6 @@ def create_event(request):
         
         data = json.loads(request.body)
         
-        # Validasi input
         if not data.get('event_title'):
             return JsonResponse({'success': False, 'message': 'Judul acara harus diisi'}, status=400)
         if not data.get('event_date'):
@@ -353,17 +363,14 @@ def create_event(request):
         if not data.get('venue_id'):
             return JsonResponse({'success': False, 'message': 'Venue harus dipilih'}, status=400)
         
-        # Parse datetime
         event_datetime_str = f"{data['event_date']} {data['event_time']}"
         event_datetime = datetime.strptime(event_datetime_str, '%m/%d/%Y %H:%M')
         
-        # Get organizer
         user_id = request.session.get('user_id')
         organizer = Organizer.objects.filter(user_id=user_id).first()
         if not organizer:
             return JsonResponse({'success': False, 'message': 'Organizer tidak ditemukan'}, status=400)
         
-        # Create event
         venue = get_object_or_404(Venue, venue_id=data['venue_id'])
         event = Event(
             event_id=uuid.uuid4(),
@@ -374,39 +381,34 @@ def create_event(request):
         )
         event.save()
         
-        # Tambah artists jika ada
+        # RAW SQL: Insert artist event
         if data.get('artists'):
-            for artist_id in data['artists']:
-                artist = Artist.objects.filter(artist_id=artist_id).first()
-                if artist:
-                    EventArtist.objects.create(
-                        event=event,
-                        artist=artist,
-                    )
+            with connection.cursor() as cursor:
+                for artist_id in data['artists']:
+                    artist = Artist.objects.filter(artist_id=artist_id).first()
+                    if artist:
+                        cursor.execute(
+                            "INSERT INTO event_artist (event_id, artist_id) VALUES (%s, %s)",
+                            [str(event.event_id), str(artist.artist_id)]
+                        )
         
-        # Tambah ticket categories
         if data.get('ticket_categories'):
             for cat_data in data['ticket_categories']:
-                try:
-                    price = float(cat_data.get('price', 0))
-                    quota = int(cat_data.get('quota', 0))
-                    TicketCategory.objects.create(
-                        category_id=uuid.uuid4(),
-                        category_name=cat_data.get('name', 'Unnamed'),
-                        price=price,
-                        quota=quota,
-                        tevent=event,
-                    )
-                except Exception as cat_error:
-                    print(f"Error creating ticket category: {cat_error}")
-                    raise
+                price = float(cat_data.get('price', 0))
+                quota = int(cat_data.get('quota', 0))
+                TicketCategory.objects.create(
+                    category_id=uuid.uuid4(),
+                    category_name=cat_data.get('name', 'Unnamed'),
+                    price=price,
+                    quota=quota,
+                    tevent=event,
+                )
         
         return JsonResponse({
             'success': True,
             'message': f"Event '{event.event_title}' berhasil dibuat!",
             'event_id': str(event.event_id)
         })
-    
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)
 
@@ -414,33 +416,26 @@ def create_event(request):
 @require_http_methods(["GET"])
 def get_event_for_edit(request, event_id):
     """Get event data for edit modal (JSON response)"""
-    
-    # Check if user is admin or organizer
     if not is_admin_or_organizer(request):
         return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
     
     try:
         event = get_object_or_404(Event, event_id=event_id)
-        
-        # Get event date and time
         event_date = event.event_datetime.strftime('%Y-%m-%d')
         event_time = event.event_datetime.strftime('%H:%M')
         
-        # Get artists
-        event_artists = EventArtist.objects.filter(event=event).select_related('artist')
-        artists = [str(ea.artist.artist_id) for ea in event_artists]
+        # RAW SQL: Ambil daftar artist ID
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT artist_id FROM event_artist WHERE event_id = %s", [str(event.event_id)])
+            artists = [str(row[0]) for row in cursor.fetchall()]
         
-        # Get ticket categories
         ticket_categories = TicketCategory.objects.filter(tevent=event)
-        categories = [
-            {
+        categories = [{
                 'name': cat.category_name,
                 'price': str(cat.price),
                 'quota': str(cat.quota),
                 'id': str(cat.category_id),
-            }
-            for cat in ticket_categories
-        ]
+            } for cat in ticket_categories]
         
         data = {
             'success': True,
@@ -454,9 +449,7 @@ def get_event_for_edit(request, event_id):
             'artists': artists,
             'categories': categories,
         }
-        
         return JsonResponse(data)
-    
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)
 
@@ -464,8 +457,6 @@ def get_event_for_edit(request, event_id):
 @require_http_methods(["POST"])
 def edit_event(request, event_id):
     """Edit event untuk admin dan organizer"""
-    
-    # Check if user is admin or organizer
     if not is_admin_or_organizer(request):
         return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
     
@@ -476,7 +467,6 @@ def edit_event(request, event_id):
         event = get_object_or_404(Event, event_id=event_id)
         data = json.loads(request.body)
         
-        # Update basic info
         if data.get('event_title'):
             event.event_title = data['event_title']
         
@@ -490,39 +480,34 @@ def edit_event(request, event_id):
         
         event.save()
         
-        # Update artists
+        # RAW SQL: Update artists
         if 'artists' in data:
-            EventArtist.objects.filter(event=event).delete()
-            for artist_id in data['artists']:
-                artist = Artist.objects.filter(artist_id=artist_id).first()
-                if artist:
-                    EventArtist.objects.create(
-                        event=event,
-                        artist=artist,
-                    )
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM event_artist WHERE event_id = %s", [str(event.event_id)])
+                for artist_id in data['artists']:
+                    artist = Artist.objects.filter(artist_id=artist_id).first()
+                    if artist:
+                        cursor.execute(
+                            "INSERT INTO event_artist (event_id, artist_id) VALUES (%s, %s)",
+                            [str(event.event_id), str(artist.artist_id)]
+                        )
         
-        # Update ticket categories
         if 'ticket_categories' in data:
             TicketCategory.objects.filter(tevent=event).delete()
             for cat_data in data['ticket_categories']:
-                try:
-                    price = float(cat_data.get('price', 0))
-                    quota = int(cat_data.get('quota', 0))
-                    TicketCategory.objects.create(
-                        category_id=uuid.uuid4(),
-                        category_name=cat_data.get('name', 'Unnamed'),
-                        price=price,
-                        quota=quota,
-                        tevent=event,
-                    )
-                except Exception as cat_error:
-                    print(f"Error creating ticket category: {cat_error}")
-                    raise
+                price = float(cat_data.get('price', 0))
+                quota = int(cat_data.get('quota', 0))
+                TicketCategory.objects.create(
+                    category_id=uuid.uuid4(),
+                    category_name=cat_data.get('name', 'Unnamed'),
+                    price=price,
+                    quota=quota,
+                    tevent=event,
+                )
         
         return JsonResponse({
             'success': True,
             'message': f"Event '{event.event_title}' berhasil diperbarui!"
         })
-    
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)

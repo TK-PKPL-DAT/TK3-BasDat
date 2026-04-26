@@ -25,7 +25,7 @@ def register_form_view(request):
     valid_roles = ['customer', 'organizer', 'admin']
     if role not in valid_roles:
         messages.error(request, 'Role tidak valid!')
-        return redirect('web:register')
+        return redirect('register')
     
     # Tentukan form dan informasi role
     role_info = {
@@ -103,7 +103,7 @@ def register_form_view(request):
                     pass
                 
                 messages.success(request, f'Registrasi {info["title"]} berhasil! Silakan login.')
-                return redirect('web:login')
+                return redirect('login')
                 
             except Exception as e:
                 messages.error(request, f'Error: {str(e)}')
@@ -166,7 +166,7 @@ def login_view(request):
                     request.session['logged_in'] = True
                     
                     messages.success(request, f'Login berhasil! Selamat datang, {username}')
-                    return redirect('web:dashboard')
+                    return redirect('dashboard')
                 else:
                     messages.error(request, 'Username atau password salah!')
                 
@@ -181,7 +181,7 @@ def logout_view(request):
     """View untuk logout"""
     request.session.flush()
     messages.success(request, 'Logout berhasil!')
-    return redirect('web:login')
+    return redirect('login')
 
 
 def dashboard_view(request):
@@ -189,7 +189,7 @@ def dashboard_view(request):
     # Cek apakah user sudah login
     if not request.session.get('logged_in'):
         messages.warning(request, 'Silakan login terlebih dahulu!')
-        return redirect('web:login')
+        return redirect('login')
     
     try:
         user_id = request.session.get('user_id')
@@ -210,4 +210,4 @@ def dashboard_view(request):
     except UserAccount.DoesNotExist:
         request.session.flush()
         messages.error(request, 'User tidak ditemukan!')
-        return redirect('web:login')
+        return redirect('login')

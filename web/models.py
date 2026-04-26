@@ -21,14 +21,13 @@ class Order(models.Model):
 
 
 class AccountRole(models.Model):
-   
-    role = models.ForeignKey('Role', on_delete=models.CASCADE)
-    user = models.ForeignKey('UserAccount', on_delete=models.CASCADE)
+    pk = models.CompositePrimaryKey('role', 'user')
+    role = models.ForeignKey('Role', models.CASCADE)
+    user = models.ForeignKey('UserAccount', models.CASCADE)
 
     class Meta:
         managed = False
-        db_table = 'tiktaktuk.account_role' 
-        unique_together = (('role', 'user'),)
+        db_table = 'account_role'
 
 
 class Artist(models.Model):
@@ -64,15 +63,25 @@ class Event(models.Model):
         db_table = 'event'
 
 
+class EventArtist(models.Model):
+    pk = models.CompositePrimaryKey('event', 'artist')
+    event = models.ForeignKey(Event, models.CASCADE)
+    artist = models.ForeignKey(Artist, models.CASCADE)
+    role = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'event_artist'
+
+
 class HasRelationship(models.Model):
-   
-    seat = models.ForeignKey('Seat', on_delete=models.CASCADE, primary_key=True) 
-    ticket = models.ForeignKey('Ticket', on_delete=models.CASCADE)
+    pk = models.CompositePrimaryKey('seat', 'ticket')
+    seat = models.ForeignKey('Seat', models.CASCADE)
+    ticket = models.ForeignKey('Ticket', models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'has_relationship'
-        unique_together = (('seat', 'ticket'),)
 
 
 class OrderPromotion(models.Model):
