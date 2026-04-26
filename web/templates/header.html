@@ -1,0 +1,85 @@
+<style>
+    .navbar-custom {
+        background: #000000;
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .navbar-content-custom {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-brand-custom {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .btn-home-navbar-custom {
+        background: white;
+        color: #4299e1;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    .btn-home-navbar-custom:hover {
+        background: #f0f0f0;
+        color: #3182ce;
+    }
+
+    .btn-logout-navbar-custom {
+        background: white;
+        color: #e53e3e;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .btn-logout-navbar-custom:hover {
+        background: #f0f0f0;
+        color: #c53030;
+    }
+</style>
+
+<nav class="navbar-custom">
+    <div class="navbar-content-custom">
+        <div class="navbar-brand-custom">🎫 TikTakTuk</div>
+        <div>
+<<<<<<< HEAD
+            <a href="{% url 'dashboard' %}" class="btn-home-navbar-custom">
+                Home
+            </a>
+            <a href="{% url 'logout' %}" class="btn-logout-navbar-custom">
+=======
+            <a href="{% url 'web:dashboard' %}" class="btn-home-navbar-custom">
+                Home
+            </a>
+            <a href="{% url 'web:logout' %}" class="btn-logout-navbar-custom">
+>>>>>>> 35f59d5cac1d575b6c1a3e0c0920c28fee6480d5
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>

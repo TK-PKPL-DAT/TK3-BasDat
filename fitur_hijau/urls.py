@@ -10,7 +10,6 @@ urlpatterns = [
     path('artist/hapus/<uuid:id>/', views.delete_artist, name='delete_artist'),
     path('ticket/', views.list_ticket, name='list_ticket'),
     path('ticket/tambah/', views.create_ticket, name='create_ticket'),
-    path('mock-login/<str:role>/', views.mock_login, name='mock_login'),
     path('ticket-category/update/<uuid:id>/', views.update_ticket, name='update_ticket'), # Ganti int jadi uuid
     path('ticket-category/delete/<uuid:id>/', views.delete_ticket, name='delete_ticket'),
 ]
