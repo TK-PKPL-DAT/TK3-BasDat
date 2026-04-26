@@ -23,4 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('test-db/', test_db_view),
     path('fitur-hijau/', include('fitur_hijau.urls')),
+    path('fitur-kuning/', include('fitur_kuning.urls')),
+    path('fitur-merah/', include('fitur_merah.urls')),
 ]

@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'web',
     'fitur_hijau',
+    'fitur_kuning',
+    'fitur_merah',
 ]
 
 MIDDLEWARE = [
@@ -86,7 +88,7 @@ tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.replace('/', ''),
+        'NAME': tmpPostgres.path.decode('utf-8').replace('/', '') if isinstance(tmpPostgres.path, bytes) else tmpPostgres.path.replace('/', ''),
         'USER': tmpPostgres.username,
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
