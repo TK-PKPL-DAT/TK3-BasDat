@@ -4,16 +4,30 @@
     <title>Kategori Tiket - TikTakTuk</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#F8FAFC] p-10 font-sans">
-    <div class="max-w-6xl mx-auto">
+<body class="bg-[#F8FAFC] font-sans">
+    {% include 'header.html' %}
+
+    <div class="max-w-6xl mx-auto p-10">
         
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 rounded-2xl {% if message.tags == 'error' %}bg-red-100 text-red-600{% else %}bg-green-100 text-green-600{% endif %} font-bold shadow-sm">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kategori Tiket</h1>
-                <p class="text-slate-400 text-sm italic">Kelola kategori dan harga tiket per acara</p>
+                <p class="text-slate-400 text-sm italic">Kelola kategori dan harga tiket per acara (Role: {{ user_role|upper }})</p>
             </div>
             {% if can_manage %}
-            <a href="{% url 'fitur_hijau:create_ticket' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg shadow-blue-100">+ Tambah Kategori</a>
+            <a href="{% url 'fitur_hijau:create_ticket' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">
+                + Tambah Kategori
+            </a>
             {% endif %}
         </div>
 
@@ -34,19 +48,19 @@
                         <td class="px-8 py-6 font-bold text-slate-700">{{ t.1 }}</td>
                         <td class="px-8 py-6 text-slate-500 text-sm">{{ t.4 }}</td>
                         <td class="px-8 py-6 text-center font-bold text-blue-600">Rp{{ t.3 }}</td>
-                        <td class="px-8 py-6 text-center text-slate-500">{{ t.2 }} tiket</td>
+                        <td class="px-8 py-6 text-center text-slate-500">{{ t.2 }} <span class="text-[10px] font-bold uppercase">Tiket</span></td>
                         
                         {% if can_manage %}
                         <td class="px-8 py-6 text-center">
                             <div class="flex justify-center gap-4">
                                 <a href="{% url 'fitur_hijau:update_ticket' t.0 %}" 
-                                class="text-xl grayscale hover:grayscale-0 transition-all cursor-pointer" 
+                                class="text-xl grayscale hover:grayscale-0 hover:scale-110 transition-all cursor-pointer" 
                                 title="Edit">
                                     📝
                                 </a>
                                 
                                 <a href="{% url 'fitur_hijau:delete_ticket' t.0 %}" 
-                                class="text-xl grayscale hover:grayscale-0 transition-all cursor-pointer" 
+                                class="text-xl grayscale hover:grayscale-0 hover:scale-110 transition-all cursor-pointer" 
                                 title="Hapus"
                                 onclick="return confirm('Hapus kategori {{ t.1 }}?')">
                                     🗑️
@@ -55,11 +69,23 @@
                         </td>
                         {% endif %}
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if can_manage %}5{% else %}4{% endif %}" class="px-8 py-10 text-center text-slate-400 font-bold italic">
+                            Belum ada kategori tiket yang dibuat.
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div class="mt-6 text-center"><a href="{% url 'fitur_hijau:list_artist' %}" class="text-slate-400 font-bold hover:text-blue-600 italic">&larr; Kembali ke Daftar Artis</a></div>
+
+        <div class="mt-8 flex justify-between items-center px-4">
+            <a href="{% url 'fitur_hijau:list_artist' %}" class="text-slate-400 font-bold hover:text-blue-600 transition-colors italic">
+                &larr; Kembali ke Daftar Artis
+            </a>
+            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">TikTakTuk Project Management</p>
+        </div>
     </div>
 </body>
 </html>
