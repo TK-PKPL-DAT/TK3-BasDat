@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'fitur_hijau',
     'fitur_kuning',
     'fitur_merah',
+    'fitur_biru',
 ]
 
 MIDDLEWARE = [

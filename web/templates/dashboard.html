@@ -103,6 +103,39 @@
             background: #f0f0f0;
             color: #333333;
         }
+        /* Efek dasar untuk semua card */
+        .feature-card {
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            /* Tambahkan styling lain seperti padding, border, border-radius di sini jika ada */
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+        }
+
+        /* Base setting untuk pita warna di bawah */
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0px; /* Sembunyi saat normal */
+            transition: height 0.3s ease;
+        }
+
+        /* Efek muncul saat di-hover */
+        .feature-card:hover::after {
+            height: 6px; 
+        }
+
+        /* --- WARNA SPESIFIK TIAP KELOMPOK --- */
+        .card-kuning::after { background-color: #ffc107; } /* Kuning Bootstrap */
+        .card-hijau::after { background-color: #198754; }  /* Hijau Bootstrap */
+        .card-biru::after { background-color: #0d6efd; }   /* Biru Bootstrap */
+        .card-merah::after { background-color: #dc3545; }  /* Merah Bootstrap */
     </style>
 </head>
 <body>
@@ -121,29 +154,44 @@
         </div>
 
        <div class="features-section">
-    <a href="{% url 'fitur_kuning:venue_list' %}" class="feature-card">
+    <a href="{% url 'fitur_kuning:venue_list' %}" class="feature-card card-kuning">
         <div class="feature-icon">🏢</div>
-        <h4>Manajemen Venue</h4>
-        <p>Kelola lokasi pertunjukan dan kapasitas tempat duduk</p>
-    </a>
-    
-    <a href="{% url 'fitur_kuning:event_list' %}" class="feature-card">
-        <div class="feature-icon">🎭</div>
-        <h4>Jelajahi Acara</h4>
-        <p>Temukan dan kelola semua acara yang tersedia</p>
-    </a>
-    
-    <a href="{% url 'fitur_hijau:list_artist' %}" class="feature-card">
-        <div class="feature-icon">🎸</div>
-        <h4>Manajemen Artist</h4>
-        <p>Kelola daftar pengisi acara dan genre musik</p>
+        <h4>Venue</h4>
+        <p>Kelola data tempat dan lokasi acara</p>
     </a>
 
-    <a href="{% url 'fitur_hijau:list_ticket' %}" class="feature-card">
+    <a href="{% url 'fitur_kuning:event_list' %}" class="feature-card card-kuning">
+        <div class="feature-icon">📅</div>
+        <h4>Event</h4>
+        <p>Kelola jadwal, artis, dan detail acara</p>
+    </a>
+
+
+    <a href="{% url 'fitur_hijau:list_artist' %}" class="feature-card card-hijau">
+        <div class="feature-icon">🎤</div>
+        <h4>Artist</h4>
+        <p>Daftar penampil dan musisi</p>
+    </a>
+
+    <a href="{% url 'fitur_hijau:list_ticket' %}" class="feature-card card-hijau">
         <div class="feature-icon">🎟️</div>
         <h4>Kategori Tiket</h4>
         <p>Atur harga, kuota, dan jenis tiket per acara</p>
     </a>
+
+
+    <a href="{% url 'fitur_biru:order_list' %}" class="feature-card card-biru">
+        <div class="feature-icon">🛒</div>
+        <h4>Semua Pesanan</h4>
+        <p>Lihat dan kelola riwayat pemesanan tiket</p>
+    </a>
+
+    <a href="{% url 'fitur_biru:promotion_list' %}" class="feature-card card-biru">
+        <div class="feature-icon">🏷️</div>
+        <h4>Promosi</h4>
+        <p>Kelola kode promo dan diskon tiket</p>
+    </a>
+
 </div>
     </div>
 

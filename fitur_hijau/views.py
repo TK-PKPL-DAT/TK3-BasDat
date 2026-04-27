@@ -17,7 +17,7 @@ def get_role(request):
 def list_artist(request):
     """READ: Menampilkan daftar artis dengan statistik sesuai revisi soal"""
     if not is_logged_in(request):
-        return redirect('web:login')
+        return redirect('login')
         
     role = get_role(request)
     
@@ -86,7 +86,7 @@ def delete_artist(request, id):
 def list_ticket(request):
     """READ: Menampilkan kategori tiket (Semua user yang login)"""
     if not is_logged_in(request):
-        return redirect('web:login')
+        return redirect('login')
 
     role = get_role(request)
     with connection.cursor() as cursor:
