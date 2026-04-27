@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import UserAccount, Role, Customer, Organizer, AccountRole
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
+
 import uuid
 import hashlib
 
@@ -189,20 +190,21 @@ def dashboard_view(request):
     # Cek apakah user sudah login
     if not request.session.get('logged_in'):
         messages.warning(request, 'Silakan login terlebih dahulu!')
-        return redirect('login')
+        return redirect('web:login')
     
     try:
         user_id = request.session.get('user_id')
         user = UserAccount.objects.get(user_id=user_id)
         
-        # Ambil role user
+        # Ambil role user dan pastikan lowercase untuk konsistensi pengecekan di template
         account_role = AccountRole.objects.filter(user_id=user_id).first()
         role_obj = account_role.role if account_role else None
-        role_name = role_obj.role_name if role_obj else 'unknown'
+        role_name = role_obj.role_name.lower() if role_obj else 'customer'
         
         context = {
             'user': user,
-            'role_name': role_name
+            'username': user.username,
+            'role_name': role_name 
         }
         
         return render(request, 'dashboard.html', context)
@@ -210,4 +212,4 @@ def dashboard_view(request):
     except UserAccount.DoesNotExist:
         request.session.flush()
         messages.error(request, 'User tidak ditemukan!')
-        return redirect('login')
+        return redirect('web:login')
