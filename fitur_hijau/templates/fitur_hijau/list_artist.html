@@ -31,165 +31,83 @@
             {% endif %}
         </div>
 
-        <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Total Artis</p>
-                <p class="text-4xl font-black text-slate-800">{{ total_artis }}</p>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Artist</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_artist|default:artis|length }}</h3>
             </div>
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Genre</p>
-                <p class="text-4xl font-black text-slate-800">{{ total_genre }}</p>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Genre</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_genre|default:"6" }}</h3>
             </div>
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Tampil di Event</p>
-                <p class="text-4xl font-black text-slate-800">{{ total_event }}</p>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tampil di Event</p>
+                <h3 class="text-3xl font-black text-slate-800">6</h3>
             </div>
         </div>
 
-        <!-- Tabel Artis Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="px-8 py-6 border-b border-slate-100">
-                <h2 class="text-xl font-black text-slate-800 mb-6">Tabel Artis</h2>
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="font-black text-slate-800">Tabel Artis</h2>
                 
-                <!-- Search & View Toggle -->
-                <div class="flex justify-between items-center gap-4 flex-wrap">
-                    <div class="flex-1 min-w-80">
-                        <form method="GET" class="flex gap-2">
-                            <div class="flex-1 relative">
-                                <input type="text" name="search" value="{{ search }}" placeholder="Cari nama atau genre..." class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg outline-none focus:border-blue-500 transition-all text-sm">
-                                <span class="absolute right-3 top-3 text-slate-400">🔍</span>
-                            </div>
-                            <button type="submit" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-all text-sm whitespace-nowrap">Filter</button>
-                            <a href="{% url 'fitur_hijau:list_artist' %}" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-all text-sm whitespace-nowrap">Reset</a>
-                        </form>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-800 border-b-2 border-blue-600 whitespace-nowrap">Tabel</button>
-                        <button class="px-3 py-2 text-sm font-bold text-slate-400 hover:text-slate-600 whitespace-nowrap">Daftar</button>
-                    </div>
+                <div class="relative w-64">
+                    <input type="text" placeholder="Cari nama atau genre..." 
+                           class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
                 </div>
-
-                <p class="text-slate-600 font-bold text-sm mt-4">
-                    <span class="text-slate-800">{{ artis|length }}</span> artis ditemukan
-                </p>
             </div>
 
-            <!-- Table -->
             <table class="w-full text-left">
-                <thead class="bg-slate-50 border-b border-slate-100">
-                    <tr class="text-slate-600 text-xs font-black uppercase tracking-widest">
-                        <th class="px-8 py-4">Artis</th>
+                <thead class="bg-slate-50">
+                    <tr class="text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                        <th class="px-8 py-4">Artist ID</th>
+                        <th class="px-8 py-4">Name (Nama Artist)</th>
                         <th class="px-8 py-4">Genre</th>
-                        {% if can_manage %}<th class="px-8 py-4 text-center">Aksi</th>{% endif %}
+                        {% if is_admin %}<th class="px-8 py-4 text-center">Action</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     {% for a in artis %}
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="px-8 py-5">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black">
-                                    {{ a.1|slice:":1"|upper }}
+                        <td class="px-8 py-5 text-xs text-slate-400 font-mono">{{ a.0 }}</td>
+                        
+                        <td class="px-8 py-5 font-bold text-slate-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black uppercase">
+                                    {{ a.1|slice:":1" }}
                                 </div>
-                                <span class="font-bold text-slate-800">{{ a.1 }}</span>
+                                {{ a.1 }}
                             </div>
                         </td>
+                        
                         <td class="px-8 py-5">
-                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-widest">{{ a.2 }}</span>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase">
+                                {{ a.2 }}
+                            </span>
                         </td>
-                        {% if can_manage %}
+                        
+                        {% if is_admin %}
                         <td class="px-8 py-5 text-center">
                             <div class="flex justify-center gap-3">
-                                <button onclick="openEditModal('{{ a.0 }}', '{{ a.1 }}', '{{ a.2 }}')" class="text-slate-600 hover:text-blue-600 transition-all">
-                                    ✏️
-                                </button>
-                                <button onclick="openDeleteModal('{{ a.0 }}', '{{ a.1 }}')" class="text-slate-600 hover:text-red-600 transition-all">
-                                    🗑️
-                                </button>
+                                <a href="{% url 'fitur_hijau:update_artist' a.0 %}" class="text-blue-600 font-bold text-xs hover:underline">[Update]</a>
+                                <a href="{% url 'fitur_hijau:delete_artist' a.0 %}" 
+                                   onclick="return confirm('Hapus {{ a.1 }}?')" 
+                                   class="text-red-600 font-bold text-xs hover:underline">[Delete]</a>
                             </div>
                         </td>
                         {% endif %}
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if can_manage %}3{% else %}2{% endif %}" class="px-8 py-12 text-center text-slate-400 font-bold italic">
-                            Belum ada artis terdaftar.
+                        <td colspan="{% if is_admin %}4{% else %}3{% endif %}" class="px-8 py-10 text-center text-slate-400 italic">
+                            Data artist tidak ditemukan.
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        
-        <div class="mt-8 flex justify-center gap-6">
-            <a href="{% url 'fitur_hijau:list_ticket' %}" class="text-blue-600 font-bold hover:underline italic">
-                Kelola Kategori Tiket &rarr;
-            </a>
-        </div>
-    </div>
-
-    <!-- Modal Create -->
-    <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-slate-800 mb-8">Tambah Artist</h2>
-            <form method="POST" action="{% url 'fitur_hijau:create_artist' %}">
-                {% csrf_token %}
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Artist</label>
-                        <input type="text" name="name" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="Masukkan nama artist..." required>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Genre</label>
-                        <input type="text" name="genre" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="Contoh: Pop, Rock, Jazz..." required>
-                    </div>
-                </div>
-                <div class="flex gap-4 mt-10">
-                    <button type="button" onclick="closeCreateModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Tambah</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Edit -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-slate-800 mb-8">Edit Artist</h2>
-            <form method="POST" id="editForm">
-                {% csrf_token %}
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Artist</label>
-                        <input type="text" id="editName" name="name" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Genre</label>
-                        <input type="text" id="editGenre" name="genre" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
-                    </div>
-                </div>
-                <div class="flex gap-4 mt-10">
-                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Delete Confirmation -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
-            <h2 class="text-2xl font-black text-red-600 mb-4">Hapus Artist?</h2>
-            <p class="text-slate-600 mb-8">Apakah Anda yakin ingin menghapus artist <span id="deleteArtistName" class="font-bold"></span>? Tindakan ini tidak dapat dibatalkan.</p>
-            <div class="flex gap-4">
-                <button type="button" onclick="closeDeleteModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
-                <form method="POST" id="deleteForm" class="flex-1">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold hover:bg-red-700 transition-all">Hapus</button>
-                </form>
-            </div>
-        </div>
+        <div class="mt-6 text-center"><a href="{% url 'fitur_hijau:list_ticket' %}" class="text-blue-600 font-bold hover:underline italic">Kelola Kategori Tiket &rarr;</a></div>
     </div>
 
     <script>

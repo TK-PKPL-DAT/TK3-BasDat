@@ -21,7 +21,7 @@ class Order(models.Model):
 
 
 class AccountRole(models.Model):
-    pk = models.CompositePrimaryKey('role_id', 'user_id')
+    pk = models.CompositePrimaryKey('role', 'user')
     role = models.ForeignKey('Role', models.CASCADE)
     user = models.ForeignKey('UserAccount', models.CASCADE)
 
@@ -64,7 +64,7 @@ class Event(models.Model):
 
 
 class EventArtist(models.Model):
-    pk = models.CompositePrimaryKey('event_id', 'artist_id')
+    pk = models.CompositePrimaryKey('event', 'artist')
     event = models.ForeignKey(Event, models.CASCADE)
     artist = models.ForeignKey(Artist, models.CASCADE)
     role = models.CharField(max_length=100, blank=True, null=True)
@@ -75,7 +75,7 @@ class EventArtist(models.Model):
 
 
 class HasRelationship(models.Model):
-    pk = models.CompositePrimaryKey('seat_id', 'ticket_id')
+    pk = models.CompositePrimaryKey('seat', 'ticket')
     seat = models.ForeignKey('Seat', models.CASCADE)
     ticket = models.ForeignKey('Ticket', models.CASCADE)
 
