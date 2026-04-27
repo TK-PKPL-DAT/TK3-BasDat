@@ -1,0 +1,62 @@
+{% include 'header.html' %} <div class="container mt-5">
+    <h2>Daftar Order</h2>
+    <p>Riwayat pembelian tiket (Role: {{ sess.role }})</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                {% if sess.role == 'admin' or sess.role == 'organizer' %}
+                <th>Pelanggan</th>
+                {% endif %}
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Total</th>
+                {% if sess.role == 'admin' %}
+                <th>Aksi</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_id }}</td>
+                {% if sess.role == 'admin' or sess.role == 'organizer' %}
+                <td>{{ order.customer.full_name }}</td>
+                {% endif %}
+                <td>{{ order.order_date|date:"Y-m-d H:i" }}</td>
+                <td>{{ order.payment_status }}</td>
+                <td>Rp {{ order.total_amount }}</td>
+                
+                {% if sess.role == 'admin' %}
+                <td>
+                    <form action="{% url 'fitur_biru:update_order_status' order.order_id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()">
+                            <option value="Pending" {% if order.payment_status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Lunas" {% if order.payment_status == 'Lunas' %}selected{% endif %}>Lunas</option>
+                            <option value="Dibatalkan" {% if order.payment_status == 'Dibatalkan' %}selected{% endif %}>Dibatalkan</option>
+                        </select>
+                    </form>
+                    
+                    <form action="{% url 'fitur_biru:delete_order' order.order_id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus order ini?')">Hapus</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Belum ada order.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
