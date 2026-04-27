@@ -75,6 +75,11 @@ def venue_list(request):
         venue_ids = Seat.objects.filter(section__icontains=seating_filter).values_list('venue_id', flat=True)
         venues = venues.filter(venue_id__in=venue_ids)
     
+    # Add seating_type for each venue
+    for venue in venues:
+        has_reserved = Seat.objects.filter(venue_id=venue.venue_id, section__icontains='reserved').exists()
+        venue.seating_type = 'RESERVED SEATING' if has_reserved else 'FREE SEATING'
+    
     # Check user role
     is_admin_or_org = is_admin_or_organizer(request)
     user_role = get_user_role(request)
@@ -149,7 +154,32 @@ def create_venue(request):
                 )
                 venue.save()
                 
-                messages.success(request, f"Venue '{venue.venue_name}' berhasil dibuat!")
+                # Create default seats based on seating type
+                has_reserved = form.cleaned_data.get('has_reserved_seating', False)
+                seating_section = 'RESERVED' if has_reserved else 'FREE'
+                
+                # Create default seat entries using bulk_create for better performance
+                capacity = int(form.cleaned_data['capacity'])
+                seats_to_create = []
+                
+                for i in range(1, capacity + 1):
+                    row = chr(65 + (i - 1) // 20)  # A, B, C, D, E... berdasarkan 20 kursi per baris
+                    seat_num = (i - 1) % 20 + 1
+                    
+                    seats_to_create.append(
+                        Seat(
+                            seat_id=uuid.uuid4(),
+                            section=seating_section,
+                            seat_number=str(seat_num),
+                            row_number=row,
+                            venue_id=venue.venue_id
+                        )
+                    )
+                
+                # Bulk create seats for better performance
+                Seat.objects.bulk_create(seats_to_create)
+                
+                messages.success(request, f"Venue '{venue.venue_name}' berhasil dibuat dengan tipe seating: {seating_section}!")
                 return redirect('fitur_kuning:venue_list')
             except Exception as e:
                 messages.error(request, f'Gagal membuat venue: {str(e)}')
@@ -367,9 +397,22 @@ def create_event(request):
         event_datetime = datetime.strptime(event_datetime_str, '%m/%d/%Y %H:%M')
         
         user_id = request.session.get('user_id')
-        organizer = Organizer.objects.filter(user_id=user_id).first()
-        if not organizer:
-            return JsonResponse({'success': False, 'message': 'Organizer tidak ditemukan'}, status=400)
+        user_role = request.session.get('role')
+        
+        # Untuk admin, buat/ambil organizer default. Untuk organizer, ambil dari DB
+        if user_role == 'admin':
+            organizer, _ = Organizer.objects.get_or_create(
+                user_id=user_id,
+                defaults={
+                    'organizer_id': uuid.uuid4(),
+                    'organizer_name': 'Admin Organizer',
+                    'contact_email': 'admin@tiktaktuk.com'
+                }
+            )
+        else:
+            organizer = Organizer.objects.filter(user_id=user_id).first()
+            if not organizer:
+                return JsonResponse({'success': False, 'message': 'Organizer tidak ditemukan'}, status=400)
         
         venue = get_object_or_404(Venue, venue_id=data['venue_id'])
         event = Event(

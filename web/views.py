@@ -133,6 +133,8 @@ def verify_password(stored_password, input_password):
 
 def login_view(request):
     """View untuk halaman login"""
+    login_error = None  # Variable untuk menyimpan error login
+    
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -156,22 +158,23 @@ def login_view(request):
                     request.session['logged_in'] = True
                     request.session['role'] = role_name  # Set role di session
                     
+                    # Tampilkan notifikasi hanya di dashboard, bukan di halaman login
                     messages.success(request, f'Login berhasil! Selamat datang, {username}')
                     return redirect('dashboard')
                 else:
-                    messages.error(request, 'Username atau password salah!')
+                    login_error = 'Username atau password salah!'
                 
             except UserAccount.DoesNotExist:
-                messages.error(request, 'Username atau password salah!')
+                login_error = 'Username atau password salah!'
     else:
         form = LoginForm()
     
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'login.html', {'form': form, 'login_error': login_error})
 
 def logout_view(request):
     """View untuk logout"""
     request.session.flush()
-    messages.success(request, 'Logout berhasil!')
+    # Gunakan session storage messages agar tidak terlihat di halaman login
     return redirect('login')
 
 
@@ -179,7 +182,7 @@ def dashboard_view(request):
     """View untuk dashboard setelah login"""
     # Cek apakah user sudah login
     if not request.session.get('logged_in'):
-        messages.warning(request, 'Silakan login terlebih dahulu!')
+        # Redirect tanpa warning message (untuk menghindari notifikasi bocor)
         return redirect('login')
     
     try:
@@ -200,5 +203,5 @@ def dashboard_view(request):
         
     except UserAccount.DoesNotExist:
         request.session.flush()
-        messages.error(request, 'User tidak ditemukan!')
+        # Redirect tanpa error message
         return redirect('login')

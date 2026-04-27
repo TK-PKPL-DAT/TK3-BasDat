@@ -16,31 +16,48 @@ def get_role(request):
 # --- ARTIST LOGIC ---
 
 def list_artist(request):
-    """READ: Menampilkan daftar artis dengan statistik sesuai revisi soal"""
+    """READ: Menampilkan daftar artis (Bisa diakses semua user yang login)"""
     if not is_logged_in(request):
         return redirect('web:login')
         
     role = get_role(request)
+    search = request.GET.get('search', '')
     
     with connection.cursor() as cursor:
-        # 1. Ambil data utama (Artist ID, Nama, Genre)
-        cursor.execute("SELECT artist_id, name, genre FROM tiktaktuk.artist ORDER BY name ASC")
+        # Query utama dengan search
+        query = "SELECT artist_id, name, genre FROM tiktaktuk.artist WHERE 1=1"
+        params = []
+        
+        if search:
+            query += " AND (name ILIKE %s OR genre ILIKE %s)"
+            params.extend([f"%{search}%", f"%{search}%"])
+        
+        query += " ORDER BY name ASC"
+        cursor.execute(query, params)
         artis = cursor.fetchall()
         
-        # 2. (Opsional) Ambil jumlah genre unik untuk Card Statistik
+        # Hitung stats
+        cursor.execute("SELECT COUNT(*) FROM tiktaktuk.artist")
+        total_artis = cursor.fetchone()[0]
+        
         cursor.execute("SELECT COUNT(DISTINCT genre) FROM tiktaktuk.artist")
         total_genre = cursor.fetchone()[0]
         
-        # 3. (Opsional) Ambil jumlah total artist
-        total_artist = len(artis)
-
+        cursor.execute("""
+            SELECT COUNT(DISTINCT ea.event_id)
+            FROM tiktaktuk.artist a
+            LEFT JOIN tiktaktuk.event_artist ea ON a.artist_id = ea.artist_id
+        """)
+        total_event = cursor.fetchone()[0]
+    
     return render(request, 'fitur_hijau/list_artist.html', {
         'artis': artis, 
         'user_role': role, 
-        'is_admin': role == 'admin',
-        'total_artist': total_artist,
+        'can_manage': role == 'admin',
+        'total_artis': total_artis,
         'total_genre': total_genre,
-        'total_event': 6 
+        'total_event': total_event,
+        'search': search
     })
 
 def create_artist(request):
@@ -60,7 +77,9 @@ def create_artist(request):
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
 
 def update_artist(request, id):
+    """UPDATE: Mengubah artis (Hanya Admin)"""
     if get_role(request) != 'admin':
+        messages.error(request, "Akses ditolak! Cuma Admin yang bisa edit Artist.")
         return redirect('fitur_hijau:list_artist')
 
     with connection.cursor() as cursor:
@@ -80,6 +99,8 @@ def delete_artist(request, id):
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM tiktaktuk.artist WHERE artist_id = %s", [id])
         messages.success(request, "Artist berhasil dihapus!")
+    else:
+        messages.error(request, "Akses ditolak! Cuma Admin yang bisa hapus Artist.")
     return redirect('fitur_hijau:list_artist')
 
 # --- TICKET LOGIC ---
@@ -117,17 +138,28 @@ def list_ticket(request):
         
         # Hitung statistik
         cursor.execute("""
-            SELECT tc.category_id, tc.category_name, tc.quota, tc.price, e.event_title 
-            FROM tiktaktuk.ticket_category tc 
-            JOIN tiktaktuk.event e ON tc.tevent_id = e.event_id
-            ORDER BY e.event_title ASC, tc.category_name ASC
+            SELECT COUNT(*), SUM(quota), MAX(price)
+            FROM tiktaktuk.ticket_category
         """)
-        tiket = cursor.fetchall()
+        stats = cursor.fetchone()
+        total_kategori = stats[0] if stats[0] else 0
+        total_kuota = stats[1] if stats[1] else 0
+        harga_tertinggi = stats[2] if stats[2] else 0
+        
+        # Ambil list events untuk filter
+        cursor.execute("SELECT event_id, event_title FROM tiktaktuk.event ORDER BY event_title")
+        events = cursor.fetchall()
     
     return render(request, 'fitur_hijau/list_ticket.html', {
         'tiket': tiket, 
-        'user_role': role, 
-        'can_manage': role in ['admin', 'organizer'] # Admin & Organizer bisa CUD tiket
+        'user_role': role,
+        'events': events,
+        'can_manage': role in ['admin', 'organizer'],
+        'total_kategori': total_kategori,
+        'total_kuota': total_kuota,
+        'harga_tertinggi': harga_tertinggi,
+        'search': search,
+        'event_filter': event_filter
     })
 
 def create_ticket(request):

@@ -7,7 +7,7 @@
 <body class="bg-[#F8FAFC] font-sans">
     {% include 'header.html' %}
 
-    <div class="max-w-6xl mx-auto p-10">
+    <div class="max-w-7xl mx-auto p-10">
         
         {% if messages %}
         <div class="mb-6">
@@ -19,15 +19,16 @@
         </div>
         {% endif %}
 
-        <div class="flex justify-between items-center mb-8">
+        <!-- Header Section -->
+        <div class="flex justify-between items-start mb-10">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kategori Tiket</h1>
-                <p class="text-slate-400 text-sm italic">Kelola kategori dan harga tiket per acara (Role: {{ user_role|upper }})</p>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Kategori Tiket</h1>
+                <p class="text-slate-400 text-sm italic mt-2">Kelola kategori dan harga tiket per acara</p>
             </div>
             {% if can_manage %}
-            <a href="{% url 'fitur_hijau:create_ticket' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">
-                + Tambah Kategori
-            </a>
+            <button onclick="openCreateModal()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                <span>+</span> Tambah Kategori
+            </button>
             {% endif %}
         </div>
 
@@ -86,34 +87,28 @@
                 <tbody class="divide-y divide-slate-100">
                     {% for t in tiket %}
                     <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="px-8 py-6 font-bold text-slate-700">{{ t.1 }}</td>
-                        <td class="px-8 py-6 text-slate-500 text-sm">{{ t.4 }}</td>
-                        <td class="px-8 py-6 text-center font-bold text-blue-600">Rp{{ t.3 }}</td>
-                        <td class="px-8 py-6 text-center text-slate-500">{{ t.2 }} <span class="text-[10px] font-bold uppercase">Tiket</span></td>
+                        <td class="px-8 py-4 font-bold text-slate-800">{{ t.1 }}</td>
+                        <td class="px-8 py-4 text-slate-600 text-sm">{{ t.4 }}</td>
+                        <td class="px-8 py-4 font-bold text-blue-600">Rp {{ t.3 }}</td>
+                        <td class="px-8 py-4 text-slate-600 font-bold">{{ t.2 }} tiket</td>
                         
                         {% if can_manage %}
                         <td class="px-8 py-4 text-center">
                             <div class="flex justify-center gap-4">
-                                <a href="{% url 'fitur_hijau:update_ticket' t.0 %}" 
-                                class="text-xl grayscale hover:grayscale-0 hover:scale-110 transition-all cursor-pointer" 
-                                title="Edit">
-                                    📝
-                                </a>
-                                
-                                <a href="{% url 'fitur_hijau:delete_ticket' t.0 %}" 
-                                class="text-xl grayscale hover:grayscale-0 hover:scale-110 transition-all cursor-pointer" 
-                                title="Hapus"
-                                onclick="return confirm('Hapus kategori {{ t.1 }}?')">
-                                    🗑️
-                                </a>
+                                <button onclick="openEditModal('{{ t.0 }}', '{{ t.1 }}', '{{ t.2 }}', '{{ t.3 }}')" class="text-slate-600 hover:text-blue-600 font-bold transition-all flex items-center gap-2">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="openDeleteModal('{{ t.0 }}', '{{ t.1 }}')" class="text-slate-600 hover:text-red-600 font-bold transition-all flex items-center gap-2">
+                                    🗑️ Hapus
+                                </button>
                             </div>
                         </td>
                         {% endif %}
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if can_manage %}5{% else %}4{% endif %}" class="px-8 py-10 text-center text-slate-400 font-bold italic">
-                            Belum ada kategori tiket yang dibuat.
+                        <td colspan="{% if can_manage %}5{% else %}4{% endif %}" class="px-8 py-12 text-center text-slate-400 font-bold italic">
+                            Belum ada kategori tiket yang ditemukan.
                         </td>
                     </tr>
                     {% endfor %}
@@ -125,7 +120,94 @@
             <a href="{% url 'fitur_hijau:list_artist' %}" class="text-slate-400 font-bold hover:text-blue-600 transition-colors italic">
                 &larr; Kembali ke Daftar Artis
             </a>
-            <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">TikTakTuk Project Management</p>
+        </div>
+    </div>
+
+    <!-- Modal Create -->
+    <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-slate-800 mb-8">Tambah Kategori Tiket</h2>
+            <form method="POST" action="{% url 'fitur_hijau:create_ticket' %}">
+                {% csrf_token %}
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Kategori</label>
+                        <input type="text" name="name" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="Contoh: Regular, VIP..." required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Pilih Acara</label>
+                        <select name="event_id" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                            <option value="">-- Pilih Acara --</option>
+                            {% for event in events %}
+                                <option value="{{ event.0 }}">{{ event.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Harga</label>
+                        <input type="number" name="price" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="100000" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Kuota</label>
+                        <input type="number" name="quota" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="100" required>
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-10">
+                    <button type="button" onclick="closeCreateModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Tambah</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-slate-800 mb-8">Edit Kategori Tiket</h2>
+            <form method="POST" id="editForm">
+                {% csrf_token %}
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Kategori</label>
+                        <input type="text" id="editName" name="name" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Pilih Acara</label>
+                        <select id="editEvent" name="event_id" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                            {% for event in events %}
+                                <option value="{{ event.0 }}">{{ event.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Harga</label>
+                        <input type="number" id="editPrice" name="price" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Kuota</label>
+                        <input type="number" id="editQuota" name="quota" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-10">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Delete Confirmation -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-black text-red-600 mb-4">Hapus Kategori Tiket?</h2>
+            <p class="text-slate-600 mb-8">Apakah Anda yakin ingin menghapus kategori tiket <span id="deleteTicketName" class="font-bold"></span>? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="flex gap-4">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 bg-slate-200 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-300 transition-all">Batal</button>
+                <form method="POST" id="deleteForm" class="flex-1">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-red-600 text-white p-4 rounded-2xl font-bold hover:bg-red-700 transition-all">Hapus</button>
+                </form>
+            </div>
         </div>
     </div>
 
