@@ -4,5 +4,5 @@ from . import views
 app_name = 'fitur_merah'
 
 urlpatterns = [
-    # Nanti kita akan tambahkan path CRUD di sini
+    path('report/', views.report_dashboard, name='report_dashboard'),
 ]

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import UserAccount, Role, Customer, Organizer, AccountRole
+from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
 
 import uuid
@@ -26,7 +26,7 @@ def register_form_view(request):
     valid_roles = ['customer', 'organizer', 'admin']
     if role not in valid_roles:
         messages.error(request, 'Role tidak valid!')
-        return redirect('register')
+        return redirect('web:register')
     
     # Tentukan form dan informasi role
     role_info = {
@@ -104,7 +104,7 @@ def register_form_view(request):
                     pass
                 
                 messages.success(request, f'Registrasi {info["title"]} berhasil! Silakan login.')
-                return redirect('login')
+                return redirect('web:login')
                 
             except Exception as e:
                 messages.error(request, f'Error: {str(e)}')
@@ -167,7 +167,7 @@ def login_view(request):
                     request.session['logged_in'] = True
                     
                     messages.success(request, f'Login berhasil! Selamat datang, {username}')
-                    return redirect('dashboard')
+                    return redirect('web:dashboard')
                 else:
                     messages.error(request, 'Username atau password salah!')
                 
@@ -182,7 +182,7 @@ def logout_view(request):
     """View untuk logout"""
     request.session.flush()
     messages.success(request, 'Logout berhasil!')
-    return redirect('login')
+    return redirect('web:login')
 
 
 def dashboard_view(request):
@@ -206,6 +206,20 @@ def dashboard_view(request):
             'username': user.username,
             'role_name': role_name 
         }
+        
+        # Data khusus untuk organizer
+        if role_name == 'organizer':
+            organizer = Organizer.objects.get(user_id=user_id)
+            events = Event.objects.filter(organizer_id=organizer.organizer_id)
+            context['organizer_name'] = organizer.organizer_name
+            context['active_events'] = events.count()
+        
+        # Data khusus untuk customer
+        elif role_name == 'customer':
+            customer = Customer.objects.get(user_id=user_id)
+            orders = Order.objects.filter(customer_id=customer.customer_id)
+            context['customer_name'] = customer.full_name
+            context['active_events'] = orders.count()
         
         return render(request, 'dashboard.html', context)
         
