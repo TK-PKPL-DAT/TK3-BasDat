@@ -1,78 +1,206 @@
 <style>
+    /* Reset & Base Styling */
     .navbar-custom {
-        background: #000000;
-        color: white;
-        padding: 1rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+        border-bottom: 2px solid #f3f4f6;
+        padding: 0.75rem 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        font-family: 'Inter', -apple-system, sans-serif;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    .navbar-content-custom {
-        max-width: 1200px;
+    .navbar-container {
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 0 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap; /* Memungkinkan elemen membungkus ke bawah jika perlu */
     }
 
-    .navbar-brand-custom {
-        font-size: 1.5rem;
-        font-weight: bold;
+    .brand-logo {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #111827;
+        text-decoration: none;
+        letter-spacing: -0.025em;
+        z-index: 1001; /* Tetap di atas saat menu mobile terbuka */
+    }
+
+    .brand-logo span {
+        color: #3b82f6;
+    }
+
+    /* Base Button Style */
+    .btn-nav {
+        padding: 0.5rem 0.875rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        color: #4b5563;
+        background: transparent;
+        text-align: center;
+    }
+
+    /* Dashboard/Home Button */
+    .btn-home {
+        background-color: #111827;
         color: white;
     }
+    .btn-home:hover {
+        background-color: #374151;
+    }
 
-    .btn-home-navbar-custom {
-        background: white;
-        color: #4299e1;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s;
-        display: inline-flex;
+    /* Hover States Berdasarkan Fitur */
+    .hover-biru:hover {
+        color: #2563eb;
+        background-color: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .hover-kuning:hover {
+        color: #854d0e;
+        background-color: #fefce8;
+        border-color: #fef08a;
+    }
+
+    .hover-hijau:hover {
+        color: #166534;
+        background-color: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .hover-merah:hover {
+        color: #991b1b;
+        background-color: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    /* Logout Button */
+    .btn-logout {
+        color: #ef4444;
+    }
+    .btn-logout:hover {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+    }
+
+    /* --- Desktop Layout --- */
+    .nav-menu {
+        display: flex;
+        gap: 0.5rem;
         align-items: center;
-        gap: 6px;
-        cursor: pointer;
     }
 
-    .btn-home-navbar-custom:hover {
-        background: #f0f0f0;
-        color: #3182ce;
-    }
-
-    .btn-logout-navbar-custom {
-        background: white;
-        color: #e53e3e;
+    .mobile-menu-btn {
+        display: none; /* Sembunyikan tombol hamburger di desktop */
+        background: transparent;
         border: none;
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
         cursor: pointer;
-        margin-left: 10px;
+        padding: 0.5rem;
+        color: #374151;
+        z-index: 1001;
     }
 
-    .btn-logout-navbar-custom:hover {
-        background: #f0f0f0;
-        color: #c53030;
+    .mobile-menu-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* --- Mobile & Tablet Layout (Responsive) --- */
+    @media (max-width: 860px) {
+        .mobile-menu-btn {
+            display: block; /* Munculkan tombol hamburger */
+        }
+
+        .nav-menu {
+            display: none; /* Sembunyikan menu default */
+            width: 100%;
+            flex-direction: column;
+            position: absolute;
+            top: 100%; /* Turun ke bawah header */
+            left: 0;
+            background-color: #ffffff;
+            padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        /* Class untuk mengaktifkan/menampilkan menu via JS */
+        .nav-menu.active {
+            display: flex;
+        }
+
+        .btn-nav {
+            width: 100%; /* Tombol jadi full width di mobile */
+            padding: 0.75rem;
+        }
+
+        .btn-logout {
+            margin-left: 0;
+            margin-top: 0.5rem;
+            border-top: 1px solid #f3f4f6;
+            border-radius: 0;
+        }
     }
 </style>
 
 <nav class="navbar-custom">
-    <div class="navbar-content-custom">
-        <div class="navbar-brand-custom">🎫 TikTakTuk</div>
-        <div>
-            <a href="{% url 'web:dashboard' %}" class="btn-home-navbar-custom">
-                Home
-            </a>
-            <a href="{% url 'web:logout' %}" class="btn-logout-navbar-custom">
-                Logout
-            </a>
+    <div class="navbar-container">
+        <a href="{% url 'web:dashboard' %}" class="brand-logo">
+            🎫 TikTak<span>Tuk</span>
+        </a>
+
+        <button class="mobile-menu-btn" id="mobile-toggle" aria-label="Toggle Navigation">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <div class="nav-menu" id="nav-menu-container">
+            {% if not request.session.logged_in %}
+                <a href="{% url 'web:login' %}" class="btn-nav hover-biru">Login</a>
+                <a href="{% url 'web:register' %}" class="btn-nav btn-home">Registrasi</a>
+            {% else %}
+                <a href="{% url 'web:dashboard' %}" class="btn-nav btn-home">Dashboard</a>
+
+                {% if role_name == 'admin' %}
+                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Manajemen Venue</a>
+                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Semua Order</a>
+                    <a href="{% url 'fitur_biru:promotion_list' %}" class="btn-nav hover-biru">Promosi</a>
+                    <a href="{% url 'fitur_merah:report_dashboard' %}" class="btn-nav hover-merah">Laporan</a>
+                    <a href="{% url 'fitur_hijau:list_artist' %}" class="btn-nav hover-hijau">Artis</a>
+                
+                {% elif role_name == 'organizer' %}
+                    <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Event Saya</a>
+                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Venue</a>
+                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Order</a>
+
+                {% elif role_name == 'customer' %}
+                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Pesanan Saya</a>
+                    <a href="{% url 'fitur_biru:promotion_list' %}" class="btn-nav hover-biru">Promosi</a>
+                    <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Cari Event</a>
+                {% endif %}
+
+                <a href="{% url 'web:logout' %}" class="btn-nav btn-logout">Logout</a>
+            {% endif %}
         </div>
     </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.getElementById('mobile-toggle');
+        const navMenu = document.getElementById('nav-menu-container');
+
+        toggleButton.addEventListener('click', function() {
+            // Menambah/menghapus class 'active' untuk memunculkan/menyembunyikan menu
+            navMenu.classList.toggle('active');
+        });
+    });
+</script>
