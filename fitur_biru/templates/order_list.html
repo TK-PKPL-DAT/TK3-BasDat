@@ -1,77 +1,121 @@
-{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Order - TikTakTuk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F8FAFC] font-sans">
+    {% include 'header.html' %}
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold">Riwayat Pesanan</h2>
-            <p class="text-muted">Kelola dan pantau status transaksi tiket (Role: <span class="badge bg-primary">{{ role_name }}</span>)</p>
+    <div class="max-w-7xl mx-auto p-10">
+        <div class="flex justify-between items-start mb-10">
+            <div>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Daftar Order</h1>
+                <p class="text-slate-400 text-sm italic mt-2">
+                    {% if sess.role == 'customer' %}Riwayat pembelian tiket Anda{% else %}Order dari event yang ada di platform{% endif %}
+                </p>
+            </div>
         </div>
-    </div>
 
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h6 class="text-muted">Total Transaksi</h6>
-                    <h3 class="fw-bold">{{ orders|length }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Order</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ orders|length|default:"0" }}</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lunas</p>
+                <h3 class="text-3xl font-black text-emerald-600">0</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pending</p>
+                <h3 class="text-3xl font-black text-amber-500">0</h3>
+            </div>
+            {% if sess.role == 'admin' or sess.role == 'organizer' %}
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Revenue</p>
+                <h3 class="text-2xl font-black text-slate-800">Rp 0</h3>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex gap-4 items-center bg-white">
+                <div class="relative w-72">
+                    <input type="text" placeholder="Cari ID {% if sess.role != 'customer' %}atau Pelanggan{% endif %}..." class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-medium text-slate-600">
+                    <span class="absolute left-4 top-2.5 text-slate-400">🔍</span>
                 </div>
+                <select class="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 focus:outline-none focus:border-blue-500 cursor-pointer">
+                    <option value="">Semua Status</option>
+                    <option value="Lunas">Lunas</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Dibatalkan">Dibatalkan</option>
+                </select>
             </div>
-        </div>
-        </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">ID Pesanan</th>
-                            <th>Tanggal</th>
-                            <th>Status</th>
-                            <th>Total Pembayaran</th>
-                            <th class="text-end pe-4">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                        <tr>
-                            <td class="ps-4">
-                                <span class="fw-medium">#{{ order.order_id|stringformat:".8s" }}</span>
-                            </td>
-                            <td>{{ order.order_date|date:"d M Y, H:i" }}</td>
-                            <td>
-                                {% if order.payment_status == 'Lunas' %}
-                                    <span class="badge bg-success-subtle text-success px-3">Lunas</span>
-                                {% elif order.payment_status == 'Pending' %}
-                                    <span class="badge bg-warning-subtle text-warning px-3">Pending</span>
-                                {% else %}
-                                    <span class="badge bg-danger-subtle text-danger px-3">{{ order.payment_status }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="fw-bold">Rp {{ order.total_amount }}</td>
-                            <td class="text-end pe-4">
-                                {% if role_name == 'admin' %}
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Update</button>
-                                        <ul class="dropdown-menu">
-                                            <li><form action="{% url 'fitur_biru:update_order_status' order.order_id %}" method="POST">
-                                                {% csrf_token %}<input type="hidden" name="status" value="Lunas"><button class="dropdown-item">Set Lunas</button></form></li>
-                                            <li><form action="{% url 'fitur_biru:update_order_status' order.order_id %}" method="POST">
-                                                {% csrf_token %}<input type="hidden" name="status" value="Batal"><button class="dropdown-item text-danger">Batalkan</button></form></li>
-                                        </ul>
-                                    </div>
-                                {% endif %}
-                                <a href="#" class="btn btn-sm btn-light border">Detail</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">Belum ada data pesanan.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <table class="w-full text-left">
+                <thead class="bg-slate-50">
+                    <tr class="text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                        <th class="px-8 py-5">Order ID</th>
+                        {% if sess.role == 'admin' or sess.role == 'organizer' %}
+                        <th class="px-8 py-5">Pelanggan</th>
+                        {% endif %}
+                        <th class="px-8 py-5">Tanggal</th>
+                        <th class="px-8 py-5">Status</th>
+                        <th class="px-8 py-5 text-right">Total</th>
+                        {% if sess.role == 'admin' %}
+                        <th class="px-8 py-5 text-center">Aksi</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for order in orders %}
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="px-8 py-5 font-mono text-xs text-slate-500">{{ order.order_id|truncatechars:12 }}</td>
+                        
+                        {% if sess.role == 'admin' or sess.role == 'organizer' %}
+                        <td class="px-8 py-5 font-bold text-slate-700 flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-black uppercase">
+                                {{ order.customer.full_name|slice:":1"|default:"C" }}
+                            </div>
+                            {{ order.customer.full_name }}
+                        </td>
+                        {% endif %}
+                        
+                        <td class="px-8 py-5 text-sm text-slate-500">{{ order.order_date|date:"Y-m-d H:i" }}</td>
+                        
+                        <td class="px-8 py-5">
+                            {% if order.payment_status == 'Lunas' %}
+                                <span class="text-emerald-600 font-bold text-xs bg-emerald-50 px-3 py-1 rounded-full flex items-center gap-1 w-max"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> LUNAS</span>
+                            {% elif order.payment_status == 'Pending' %}
+                                <span class="text-amber-600 font-bold text-xs bg-amber-50 px-3 py-1 rounded-full flex items-center gap-1 w-max"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> PENDING</span>
+                            {% else %}
+                                <span class="text-red-600 font-bold text-xs bg-red-50 px-3 py-1 rounded-full flex items-center gap-1 w-max"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> DIBATALKAN</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td class="px-8 py-5 font-black text-slate-800 text-right">Rp {{ order.total_amount|floatformat:0 }}</td>
+                        
+                        {% if sess.role == 'admin' %}
+                        <td class="px-8 py-5 text-center">
+                            <div class="flex justify-center gap-2">
+                                <a href="#" class="text-slate-400 hover:text-blue-600 transition-colors" title="Edit Status">✏️</a>
+                                <form action="{% url 'fitur_biru:delete_order' order.order_id %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-slate-400 hover:text-red-600 transition-colors" onclick="return confirm('Yakin hapus order ini?')" title="Hapus Order">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-8 py-10 text-center text-slate-400 italic">Belum ada riwayat pemesanan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
+</body>
+</html>
