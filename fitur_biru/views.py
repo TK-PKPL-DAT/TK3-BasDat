@@ -5,6 +5,7 @@ from django.http import JsonResponse
 import uuid
 from datetime import datetime
 from web.models import Order, Promotion, OrderPromotion, Customer, UserAccount, AccountRole
+from django.db.models import Count
 
 # Fungsi helper untuk cek role
 def get_session_data(request):
@@ -87,9 +88,24 @@ def delete_order(request, order_id):
 
 def promotion_list(request):
     """Menampilkan daftar promosi (R-Promotion) """
-    promotions = Promotion.objects.all().order_by('-start_date')
     sess = get_session_data(request)
-    return render(request, 'promotion_list.html', {'promotions': promotions, 'sess': sess})
+    
+    # Ambil semua promo & hitung berapa kali masing-masing promo sudah digunakan 
+    promotions = Promotion.objects.annotate(
+        usage_count=Count('orderpromotion')
+    ).order_by('-start_date')
+
+    # Hitung brp kali promosi dipakai
+    total_usage = OrderPromotion.objects.count()
+    total_percentage = promotions.filter(discount_type='PERCENTAGE').count()
+
+    context = {
+        'promotions': promotions, 
+        'sess': sess,
+        'total_usage': total_usage,
+        'total_percentage': total_percentage
+    }
+    return render(request, 'promotion_list.html', context)
 
 def create_promotion(request):
     """Membuat promo baru (CUD-Promotion) - Hanya Admin """
@@ -111,9 +127,17 @@ def edit_promotion(request, promotion_id):
     """Mengubah promo (CUD-Promotion) """
     promo = get_object_or_404(Promotion, promotion_id=promotion_id)
     if request.method == 'POST':
+        # Simpan SEMUA data dari form, bukan cuma promo_code
         promo.promo_code = request.POST.get('promo_code')
+        promo.discount_type = request.POST.get('discount_type')
+        promo.discount_value = request.POST.get('discount_value')
+        promo.start_date = request.POST.get('start_date')
+        promo.end_date = request.POST.get('end_date')
+        promo.usage_limit = request.POST.get('usage_limit')
         promo.save()
+        messages.success(request, "Promo berhasil diperbarui!")
         return redirect('fitur_biru:promotion_list')
+        
     return render(request, 'fitur_biru/form_promotion.html', {'promo': promo})
 
 def delete_promotion(request, promotion_id):

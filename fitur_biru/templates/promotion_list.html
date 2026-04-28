@@ -1,52 +1,200 @@
-{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Manajemen Promosi - TikTakTuk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F8FAFC] font-sans">
+    {% include 'header.html' %}
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2>Manajemen Promosi</h2>
-        {% if sess.role == 'admin' %}
-        <a href="{% url 'fitur_biru:create_promotion' %}" class="btn btn-success">+ Buat Promo</a>
-        {% endif %}
+    <div class="max-w-7xl mx-auto p-10">
+        <div class="flex justify-between items-start mb-10">
+            <div>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Manajemen Promosi</h1>
+                <p class="text-slate-400 text-sm italic mt-2">Kelola kode promo dan kampanye diskon</p>
+            </div>
+            {% if sess.role == 'admin' %}
+            <button onclick="openCreateModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                <span>+</span> Buat Promo
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Promo</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ promotions|length|default:"0" }}</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Penggunaan</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_usage }}x</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipe Persentase</p>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_percentage }}</h3> 
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex gap-4 items-center bg-white">
+                <div class="relative w-72">
+                    <input type="text" placeholder="Cari kode promo..." class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-medium text-slate-600">
+                    <span class="absolute left-4 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <select class="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 focus:outline-none focus:border-blue-500 cursor-pointer">
+                    <option value="">Semua Tipe</option>
+                    <option value="PERCENTAGE">Persentase</option>
+                    <option value="NOMINAL">Nominal</option>
+                </select>
+            </div>
+
+            <table class="w-full text-left">
+                <thead class="bg-slate-50">
+                    <tr class="text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                        <th class="px-8 py-5">Kode Promo</th>
+                        <th class="px-8 py-5">Tipe</th>
+                        <th class="px-8 py-5">Nilai Diskon</th>
+                        <th class="px-8 py-5">Mulai</th>
+                        <th class="px-8 py-5">Berakhir</th>
+                        <th class="px-8 py-5 text-center">Penggunaan</th>
+                        {% if sess.role == 'admin' %}<th class="px-8 py-5 text-center">Aksi</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for promo in promotions %}
+                    <tr class="hover:bg-blue-50/30 transition-colors">
+                        <td class="px-8 py-5 font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-xs">🎟️</span>
+                            {{ promo.promo_code }}
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase">
+                                {{ promo.discount_type }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 font-bold text-slate-700">
+                            {% if promo.discount_type == 'PERCENTAGE' %}{{ promo.discount_value|floatformat:0 }}%{% else %}Rp {{ promo.discount_value|floatformat:0 }}{% endif %}
+                        </td>
+                        <td class="px-8 py-5 text-sm text-slate-500">{{ promo.start_date|date:"Y-m-d" }}</td>
+                        <td class="px-8 py-5 text-sm text-slate-500">{{ promo.end_date|date:"Y-m-d" }}</td>
+                        <td class="px-8 py-5 text-center font-mono text-sm text-slate-500">{{ promo.usage_count|default:"0" }} / {{ promo.usage_limit }}</td>
+                        
+                        {% if sess.role == 'admin' %}
+                        <td class="px-8 py-5 text-center">
+                            <div class="flex justify-center gap-3">
+                                <button onclick="openEditModal('{{ promo.promotion_id }}', '{{ promo.promo_code|escapejs }}', '{{ promo.discount_type }}', '{{ promo.discount_value }}', '{{ promo.start_date|date:"Y-m-d" }}', '{{ promo.end_date|date:"Y-m-d" }}', '{{ promo.usage_limit }}')" 
+                                    class="text-blue-600 font-bold text-xs hover:underline bg-blue-50 px-3 py-1.5 rounded-lg">Edit</button>
+                                
+                                <form action="{% url 'fitur_biru:delete_promotion' promo.promotion_id %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-600 font-bold text-xs hover:underline bg-red-50 px-3 py-1.5 rounded-lg" onclick="return confirm('Yakin hapus promo ini?')">Hapus</button>
+                                </form>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="px-8 py-10 text-center text-slate-400 italic">Belum ada promosi.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <table class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>Kode Promo</th>
-                <th>Tipe</th>
-                <th>Nilai Diskon</th>
-                <th>Mulai</th>
-                <th>Berakhir</th>
-                <th>Batas Penggunaan</th>
-                {% if sess.role == 'admin' %}
-                <th>Aksi</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for promo in promotions %}
-            <tr>
-                <td><strong>{{ promo.promo_code }}</strong></td>
-                <td>{{ promo.discount_type }}</td>
-                <td>{{ promo.discount_value }}</td>
-                <td>{{ promo.start_date|date:"Y-m-d" }}</td>
-                <td>{{ promo.end_date|date:"Y-m-d" }}</td>
-                <td>{{ promo.usage_limit }}x</td>
-                
-                {% if sess.role == 'admin' %}
-                <td>
-                    <a href="{% url 'fitur_biru:edit_promotion' promo.promotion_id %}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{% url 'fitur_biru:delete_promotion' promo.promotion_id %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus promo ini?')">Hapus</button>
-                    </form>
-                </td>
-                {% endif %}
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center">Belum ada promosi.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div id="promo-modal" class="fixed inset-0 z-[1050] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden scale-100">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h2 id="modal-title" class="text-xl font-black text-slate-800 tracking-tight">✨ Buat Promo Baru</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 bg-slate-200/50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="promo-form" method="POST">
+                {% csrf_token %}
+                <div class="p-6 space-y-5">
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Kode Promo</label>
+                        <input type="text" name="promo_code" id="field-promo_code" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 uppercase" placeholder="TIKTAK100">
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Tipe</label>
+                            <select name="discount_type" id="field-discount_type" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                                <option value="PERCENTAGE">Persentase (%)</option>
+                                <option value="NOMINAL">Nominal (Rp)</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Nilai</label>
+                            <input type="number" name="discount_value" id="field-discount_value" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Mulai</label>
+                            <input type="date" name="start_date" id="field-start_date" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Berakhir</label>
+                            <input type="date" name="end_date" id="field-end_date" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Kuota Penggunaan</label>
+                        <input type="number" name="usage_limit" id="field-usage_limit" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-200 transition-colors">Batal</button>
+                    <button type="submit" id="submit-btn" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 shadow-lg hover:bg-blue-700 transition-all">Buat Promo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('promo-modal');
+        const form = document.getElementById('promo-form');
+        const title = document.getElementById('modal-title');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function openCreateModal() {
+            title.innerText = "✨ Buat Promo Baru";
+            submitBtn.innerText = "Buat Promo";
+            form.action = "{% url 'fitur_biru:create_promotion' %}";
+            form.reset();
+            modal.classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openEditModal(id, code, type, value, start, end, limit) {
+            title.innerText = "✏️ Edit Promo";
+            submitBtn.innerText = "Simpan Perubahan";
+            
+            // FIX: Menggunakan UUID valid yang dummy agar lolos validasi Regex Django
+            let dummyUrl = "{% url 'fitur_biru:edit_promotion' '00000000-0000-0000-0000-000000000000' %}";
+            let editUrl = dummyUrl.replace('00000000-0000-0000-0000-000000000000', id);
+            form.action = editUrl;
+
+            // Isi data ke field
+            document.getElementById('field-promo_code').value = code;
+            document.getElementById('field-discount_type').value = type;
+            document.getElementById('field-discount_value').value = value;
+            document.getElementById('field-start_date').value = start;
+            document.getElementById('field-end_date').value = end;
+            document.getElementById('field-usage_limit').value = limit;
+
+            modal.classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.replace('flex', 'hidden');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>

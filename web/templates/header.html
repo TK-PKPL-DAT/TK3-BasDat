@@ -1,5 +1,6 @@
+{% include 'toast.html' %}
+
 <style>
-    /* Reset & Base Styling */
     .navbar-custom {
         background-color: #ffffff;
         border-bottom: 2px solid #f3f4f6;
@@ -17,7 +18,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap; /* Memungkinkan elemen membungkus ke bawah jika perlu */
+        flex-wrap: wrap; 
     }
 
     .brand-logo {
@@ -26,14 +27,13 @@
         color: #111827;
         text-decoration: none;
         letter-spacing: -0.025em;
-        z-index: 1001; /* Tetap di atas saat menu mobile terbuka */
+        z-index: 1001; 
     }
 
     .brand-logo span {
         color: #3b82f6;
     }
 
-    /* Base Button Style */
     .btn-nav {
         padding: 0.5rem 0.875rem;
         border-radius: 0.5rem;
@@ -47,107 +47,35 @@
         text-align: center;
     }
 
-    /* Dashboard/Home Button */
-    .btn-home {
-        background-color: #111827;
-        color: white;
-    }
-    .btn-home:hover {
-        background-color: #374151;
-    }
+    .btn-home { background-color: #111827; color: white; }
+    .btn-home:hover { background-color: #374151; }
+    .hover-biru:hover { color: #2563eb; background-color: #eff6ff; border-color: #bfdbfe; }
+    .hover-kuning:hover { color: #854d0e; background-color: #fefce8; border-color: #fef08a; }
+    .hover-hijau:hover { color: #166534; background-color: #f0fdf4; border-color: #bbf7d0; }
+    .hover-merah:hover { color: #991b1b; background-color: #fef2f2; border-color: #fecaca; }
+    
+    .btn-logout { color: #ef4444; }
+    .btn-logout:hover { background-color: #fee2e2; border-color: #fecaca; }
 
-    /* Hover States Berdasarkan Fitur */
-    .hover-biru:hover {
-        color: #2563eb;
-        background-color: #eff6ff;
-        border-color: #bfdbfe;
-    }
-
-    .hover-kuning:hover {
-        color: #854d0e;
-        background-color: #fefce8;
-        border-color: #fef08a;
-    }
-
-    .hover-hijau:hover {
-        color: #166534;
-        background-color: #f0fdf4;
-        border-color: #bbf7d0;
-    }
-
-    .hover-merah:hover {
-        color: #991b1b;
-        background-color: #fef2f2;
-        border-color: #fecaca;
-    }
-
-    /* Logout Button */
-    .btn-logout {
-        color: #ef4444;
-    }
-    .btn-logout:hover {
-        background-color: #fee2e2;
-        border-color: #fecaca;
-    }
-
-    /* --- Desktop Layout --- */
-    .nav-menu {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
+    .nav-menu { display: flex; gap: 0.5rem; align-items: center; }
     .mobile-menu-btn {
-        display: none; /* Sembunyikan tombol hamburger di desktop */
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        color: #374151;
-        z-index: 1001;
+        display: none; background: transparent; border: none; cursor: pointer;
+        padding: 0.5rem; color: #374151; z-index: 1001;
     }
+    .mobile-menu-btn svg { width: 24px; height: 24px; }
 
-    .mobile-menu-btn svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    /* --- Mobile & Tablet Layout (Responsive) --- */
     @media (max-width: 860px) {
-        .mobile-menu-btn {
-            display: block; /* Munculkan tombol hamburger */
-        }
-
+        .mobile-menu-btn { display: block; }
         .nav-menu {
-            display: none; /* Sembunyikan menu default */
-            width: 100%;
-            flex-direction: column;
-            position: absolute;
-            top: 100%; /* Turun ke bawah header */
-            left: 0;
-            background-color: #ffffff;
-            padding: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #f3f4f6;
+            display: none; width: 100%; flex-direction: column; position: absolute;
+            top: 100%; left: 0; background-color: #ffffff; padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-bottom: 2px solid #f3f4f6;
         }
-
-        /* Class untuk mengaktifkan/menampilkan menu via JS */
-        .nav-menu.active {
-            display: flex;
-        }
-
-        .btn-nav {
-            width: 100%; /* Tombol jadi full width di mobile */
-            padding: 0.75rem;
-        }
-
-        .btn-logout {
-            margin-left: 0;
-            margin-top: 0.5rem;
-            border-top: 1px solid #f3f4f6;
-            border-radius: 0;
-        }
+        .nav-menu.active { display: flex; }
+        .btn-nav { width: 100%; padding: 0.75rem; }
+        .btn-logout { margin-left: 0; margin-top: 0.5rem; border-top: 1px solid #f3f4f6; border-radius: 0; }
     }
+
 </style>
 
 <nav class="navbar-custom">
@@ -194,13 +122,15 @@
 </nav>
 
 <script>
+    // Script Mobile Navbar
     document.addEventListener('DOMContentLoaded', function() {
         const toggleButton = document.getElementById('mobile-toggle');
         const navMenu = document.getElementById('nav-menu-container');
 
-        toggleButton.addEventListener('click', function() {
-            // Menambah/menghapus class 'active' untuk memunculkan/menyembunyikan menu
-            navMenu.classList.toggle('active');
-        });
+        if(toggleButton && navMenu) {
+            toggleButton.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+        }
     });
 </script>
