@@ -104,20 +104,10 @@
             <p>Login untuk Melanjutkan</p>
         </div>
 
-        {% if messages %}
+        <!-- Error Notifikasi untuk Login -->
+        {% if login_error %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {% for message in messages %}
-                {{ message }}
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
-
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {% for error in form.non_field_errors %}
-                <div>{{ error }}</div>
-            {% endfor %}
+            {{ login_error }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endif %}
@@ -145,7 +135,7 @@
         </form>
 
         <div class="register-link">
-            Belum punya akun? <a href="{% url 'register' %}">Daftar di sini</a>
+            Belum punya akun? <a href="{% url 'web:register' %}">Daftar di sini</a>
         </div>
     </div>
 

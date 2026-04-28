@@ -1,0 +1,15 @@
+{% include 'header.html' %}
+
+<div class="container mt-5">
+    <h2>Checkout Tiket</h2>
+    <p>Silakan selesaikan pesanan Anda.</p>
+
+    <form action="{% url 'fitur_biru:create_order' %}" method="POST" class="mt-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Total Harga (Dummy)</label>
+            <input type="number" name="total_amount" class="form-control" value="150000" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Bayar Sekarang (Buat Order)</button>
+    </form>
+</div>

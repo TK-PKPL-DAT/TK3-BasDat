@@ -1,0 +1,52 @@
+{% include 'header.html' %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Manajemen Promosi</h2>
+        {% if sess.role == 'admin' %}
+        <a href="{% url 'fitur_biru:create_promotion' %}" class="btn btn-success">+ Buat Promo</a>
+        {% endif %}
+    </div>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Kode Promo</th>
+                <th>Tipe</th>
+                <th>Nilai Diskon</th>
+                <th>Mulai</th>
+                <th>Berakhir</th>
+                <th>Batas Penggunaan</th>
+                {% if sess.role == 'admin' %}
+                <th>Aksi</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for promo in promotions %}
+            <tr>
+                <td><strong>{{ promo.promo_code }}</strong></td>
+                <td>{{ promo.discount_type }}</td>
+                <td>{{ promo.discount_value }}</td>
+                <td>{{ promo.start_date|date:"Y-m-d" }}</td>
+                <td>{{ promo.end_date|date:"Y-m-d" }}</td>
+                <td>{{ promo.usage_limit }}x</td>
+                
+                {% if sess.role == 'admin' %}
+                <td>
+                    <a href="{% url 'fitur_biru:edit_promotion' promo.promotion_id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{% url 'fitur_biru:delete_promotion' promo.promotion_id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus promo ini?')">Hapus</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">Belum ada promosi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

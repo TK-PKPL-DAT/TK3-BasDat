@@ -1,0 +1,41 @@
+{% include 'header.html' %}
+
+<div class="container mt-5">
+    <h2>{% if promo %}Edit Promo{% else %}Buat Promo Baru{% endif %}</h2>
+
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Kode Promo</label>
+            <input type="text" name="promo_code" class="form-control" value="{{ promo.promo_code }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Tipe Diskon</label>
+            <select name="discount_type" class="form-control">
+                <option value="PERCENTAGE" {% if promo.discount_type == 'PERCENTAGE' %}selected{% endif %}>Persentase (%)</option>
+                <option value="NOMINAL" {% if promo.discount_type == 'NOMINAL' %}selected{% endif %}>Nominal (Rp)</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Nilai Diskon</label>
+            <input type="number" name="discount_value" class="form-control" value="{{ promo.discount_value }}" required>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Tanggal Mulai</label>
+                <input type="date" name="start_date" class="form-control" value="{{ promo.start_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Tanggal Berakhir</label>
+                <input type="date" name="end_date" class="form-control" value="{{ promo.end_date|date:'Y-m-d' }}" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label>Batas Penggunaan</label>
+            <input type="number" name="usage_limit" class="form-control" value="{{ promo.usage_limit }}" required>
+        </div>
+        
+        <a href="{% url 'fitur_biru:promotion_list' %}" class="btn btn-secondary">Batal</a>
+        <button type="submit" class="btn btn-primary">{% if promo %}Simpan Perubahan{% else %}Buat Promo{% endif %}</button>
+    </form>
+</div>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
@@ -188,3 +189,14 @@ def update_ticket(request, id):
         return redirect('fitur_merah:list_ticket')
     
     return render(request, 'fitur_merah/form_ticket.html', {'mode': 'Update'})
+=======
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+def report_dashboard(request):
+    """View untuk dashboard laporan"""
+    context = {
+        'page_title': 'Dashboard Laporan'
+    }
+    return render(request, 'fitur_merah/report_dashboard.html', context)
+>>>>>>> main

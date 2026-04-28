@@ -28,7 +28,7 @@
             font-size: 14px;
         }
         .btn-add-venue {
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -41,15 +41,15 @@
             gap: 8px;
         }
         .btn-add-venue:hover {
-            background: #3182ce;
+            background: #1d4ed8;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
         }
         .btn-home {
             background: white;
-            color: #4299e1;
-            border: 2px solid #4299e1;
+            color: #2563eb;
+            border: 2px solid #2563eb;
             padding: 10px 20px;
             border-radius: 20px;
             font-weight: 600;
@@ -60,7 +60,7 @@
             gap: 8px;
         }
         .btn-home:hover {
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             transform: translateY(-2px);
         }
@@ -75,7 +75,7 @@
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #4299e1;
+            border-left: 4px solid #2563eb;
         }
         .stat-label {
             color: #a0aec0;
@@ -104,10 +104,6 @@
             font-size: 14px;
             transition: all 0.3s;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-        }
         .venue-list-container {
             background: white;
             border-radius: 10px;
@@ -131,9 +127,12 @@
             gap: 15px;
             margin-bottom: 15px;
         }
+        .venue-header-content {
+            flex-grow: 1;
+        }
         .venue-icon {
             font-size: 32px;
-            color: #4299e1;
+            color: #2563eb;
             background: #ebf8ff;
             width: 50px;
             height: 50px;
@@ -179,21 +178,26 @@
             font-weight: 600;
         }
         .seating-badge {
-            display: inline-block;
-            background: #ebf8ff;
-            color: #2c5282;
-            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
         }
         .seating-badge.free {
-            background: #f0fff4;
-            color: #22543d;
+            background: #dcfce7;
+            color: #166534;
         }
         .seating-badge.reserved {
-            background: #fef5e7;
-            color: #7d6608;
+            background: #dbeafe;
+            color: #1e40af;
         }
         .venue-actions {
             display: flex;
@@ -299,8 +303,8 @@
             transition: all 0.3s;
         }
         .form-control:focus, .form-select:focus {
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             outline: none;
         }
         .form-control::placeholder {
@@ -329,11 +333,11 @@
             transition: all 0.3s;
         }
         .form-check-input:checked {
-            background-color: #4299e1;
-            border-color: #4299e1;
+            background-color: #2563eb;
+            border-color: #2563eb;
         }
         .form-check-input:focus {
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         .form-check-label {
             color: #4a5568;
@@ -367,13 +371,13 @@
             color: #2d3748;
         }
         .btn-tambah {
-            background: #4299e1;
+            background: #2563eb;
             color: white;
         }
         .btn-tambah:hover {
-            background: #3182ce;
+            background: #1d4ed8;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
         }
         .btn-tambah:disabled {
             background: #cbd5e0;
@@ -463,7 +467,7 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn btn-sm" style="background: #4299e1; color: white;">
+                        <button type="submit" class="btn btn-sm" style="background: #2563eb; color: white;">
                             <i class="bi bi-search"></i> Cari
                         </button>
                     </div>
@@ -479,12 +483,17 @@
                             <div class="venue-icon">
                                 <i class="bi bi-building"></i>
                             </div>
-                            <div style="flex-grow: 1;">
+                            <div class="venue-header-content">
                                 <div class="venue-title">{{ venue.venue_name }}</div>
                                 <div class="venue-address">
                                     <i class="bi bi-geo-alt"></i> {{ venue.address }}, {{ venue.city }}
                                 </div>
                             </div>
+                            {% if venue.seating_type %}
+                            <span class="seating-badge {% if 'FREE' in venue.seating_type %}free{% else %}reserved{% endif %}">
+                                <i class="bi bi-check-circle"></i> {{ venue.seating_type }}
+                            </span>
+                            {% endif %}
                         </div>
 
                         <div class="venue-info">

@@ -4,6 +4,7 @@ from . import views
 app_name = 'fitur_merah'
 
 urlpatterns = [
+<<<<<<< HEAD
     path('seats/', views.list_seat, name='list_seat'),
     path('seats/tambah/', views.create_seat, name='create_seat'),
     path('seats/edit/<uuid:id>/', views.update_seat, name='update_seat'),
@@ -12,4 +13,7 @@ urlpatterns = [
     path('tickets/tambah/', views.create_ticket, name='create_ticket'),
     path('tickets/edit/<uuid:id>/', views.update_ticket, name='update_ticket'),
     path('tickets/hapus/<uuid:id>/', views.delete_ticket, name='delete_ticket'),
+=======
+    path('report/', views.report_dashboard, name='report_dashboard'),
+>>>>>>> main
 ]
