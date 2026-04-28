@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if promo %}Edit Promo{% else %}Buat Promo Baru{% endif %} - TikTakTuk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F8FAFC] font-sans overflow-hidden">
+    {% include 'header.html' %}
+
+    <div class="fixed inset-0 z-[1050] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-opacity">
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
+            
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">
+                    {% if promo %}✏️ Edit Promo{% else %}✨ Buat Promo Baru{% endif %}
+                </h2>
+                <a href="{% url 'fitur_biru:promotion_list' %}" class="text-slate-400 hover:text-red-500 bg-slate-200/50 hover:bg-red-50 p-2 rounded-full transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </a>
+            </div>
+
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="p-6 space-y-5">
+                    
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Kode Promo</label>
+                        <input type="text" name="promo_code" value="{{ promo.promo_code }}" required
+                            class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 transition-all uppercase placeholder:normal-case placeholder-slate-400" placeholder="Contoh: TIKTAK100">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Tipe Diskon</label>
+                            <select name="discount_type" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 cursor-pointer transition-all">
+                                <option value="PERCENTAGE" {% if promo.discount_type == 'PERCENTAGE' %}selected{% endif %}>Persentase (%)</option>
+                                <option value="NOMINAL" {% if promo.discount_type == 'NOMINAL' %}selected{% endif %}>Nominal (Rp)</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Nilai Diskon</label>
+                            <input type="number" name="discount_value" value="{{ promo.discount_value }}" required
+                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 transition-all" placeholder="Misal: 50000">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Mulai</label>
+                            <input type="date" name="start_date" value="{{ promo.start_date|date:'Y-m-d' }}" required
+                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 transition-all">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Berakhir</label>
+                            <input type="date" name="end_date" value="{{ promo.end_date|date:'Y-m-d' }}" required
+                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Batas Penggunaan (Kuota)</label>
+                        <input type="number" name="usage_limit" value="{{ promo.usage_limit }}" required
+                            class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-bold text-slate-700 transition-all" placeholder="Contoh: 100 orang">
+                    </div>
+
+                </div>
+
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                    <a href="{% url 'fitur_biru:promotion_list' %}" class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors">Batal</a>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-[0_4px_12px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_16px_rgba(37,99,235,0.4)] transition-all">
+                        {% if promo %}Simpan Perubahan{% else %}Buat Promo{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

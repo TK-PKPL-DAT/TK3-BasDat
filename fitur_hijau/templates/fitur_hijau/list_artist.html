@@ -7,12 +7,22 @@
 <body class="bg-[#F8FAFC] font-sans">
     {% include 'header.html' %}
 
-    <div class="max-w-6xl mx-auto p-10">
-        
-        <div class="flex justify-between items-center mb-8">
+    <div class="max-w-7xl mx-auto p-10">
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 rounded-2xl {% if message.tags == 'error' %}bg-red-100 text-red-600{% else %}bg-green-100 text-green-600{% endif %} font-bold shadow-sm">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Header Section -->
+        <div class="flex justify-between items-start mb-10">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">Daftar Artis</h1>
-                <p class="text-slate-400 text-sm italic">Kelola artis yang ada di platform TikTakTuk</p>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Daftar Artis</h1>
+                <p class="text-slate-400 text-sm italic mt-2">Ketela artis yang ada di platform TikTakTuk</p>
             </div>
             {% if is_admin %}
             <button type="button" onclick="openArtistModal('create')" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
@@ -95,6 +105,7 @@
                 </tbody>
             </table>
         </div>
+        <div class="mt-6 text-center"><a href="{% url 'fitur_hijau:list_ticket' %}" class="text-blue-600 font-bold hover:underline italic">Kelola Kategori Tiket &rarr;</a></div>
     </div>
 
     {% if is_admin %}

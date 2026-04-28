@@ -1,0 +1,103 @@
+<style>
+    /* -- PURE CSS biar aman -- */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+        font-family: 'Inter', -apple-system, sans-serif;
+    }
+
+    .toast-message {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        min-width: 320px;
+        background-color: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border-left: 4px solid transparent;
+        pointer-events: auto;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-in-out;
+    }
+
+    .toast-message.show { transform: translateX(0); opacity: 1; }
+    .toast-message.hide { transform: translateX(120%); opacity: 0; }
+    .toast-success { border-left-color: #10b981; }
+    .toast-error { border-left-color: #ef4444; }
+    .toast-content-wrapper { display: flex; align-items: center; gap: 12px; }
+
+    .toast-icon {
+        flex-shrink: 0; width: 40px; height: 40px; display: flex;
+        align-items: center; justify-content: center; border-radius: 50%;
+    }
+    .toast-icon svg { width: 24px; height: 24px; }
+    .toast-icon-success { background-color: #d1fae5; color: #10b981; }
+    .toast-icon-error { background-color: #fee2e2; color: #ef4444; }
+
+    .toast-text { display: flex; flex-direction: column; }
+    .toast-title { font-size: 0.875rem; font-weight: 900; color: #1e293b; margin: 0; letter-spacing: -0.025em; }
+    .toast-desc { font-size: 0.75rem; color: #64748b; font-weight: 500; margin: 2px 0 0 0; }
+
+    .toast-close {
+        background: transparent; border: none; color: #94a3b8; cursor: pointer;
+        padding: 4px; margin-left: 16px; transition: color 0.2s;
+    }
+    .toast-close:hover { color: #1e293b; }
+    .toast-close svg { width: 16px; height: 16px; }
+</style>
+
+{% if messages %}
+<div class="toast-container">
+    {% for message in messages %}
+        <div class="toast-message {% if message.tags == 'error' %}toast-error{% else %}toast-success{% endif %}">
+            <div class="toast-content-wrapper">
+                <div class="toast-icon {% if message.tags == 'error' %}toast-icon-error{% else %}toast-icon-success{% endif %}">
+                    {% if message.tags == 'error' %}
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    {% else %}
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    {% endif %}
+                </div>
+                <div class="toast-text">
+                    <p class="toast-title">
+                        {% if message.tags == 'error' %}Yah, Gagal!{% else %}Berhasil!{% endif %}
+                    </p>
+                    <p class="toast-desc">{{ message }}</p>
+                </div>
+            </div>
+            <button onclick="closeToast(this)" class="toast-close">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toasts = document.querySelectorAll('.toast-message');
+        toasts.forEach((toast, index) => {
+            setTimeout(() => { toast.classList.add('show'); }, 100 + (index * 150));
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    closeToast(toast.querySelector('button'));
+                }
+            }, 4000 + (index * 150));
+        });
+    });
+
+    function closeToast(btn) {
+        const toast = btn.closest('.toast-message');
+        toast.classList.remove('show');
+        toast.classList.add('hide'); 
+        setTimeout(() => { toast.remove(); }, 500); 
+    }
+</script>
+{% endif %}

@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import UserAccount, Role, Customer, Organizer, AccountRole
+from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
+from django.db.models import Sum
 import uuid
-import hashlib
 
 
 def test_db_view(request):
@@ -56,16 +56,15 @@ def register_form_view(request):
         form = form_class(request.POST)
         if form.is_valid():
             try:
-                # Hash password
+                # Ambil password tanpa di-hash
                 password = form.cleaned_data['password']
-                password_hash = hashlib.sha256(password.encode()).hexdigest()
                 username = form.cleaned_data['username']
                 
-                # Buat UserAccount
+                # Buat UserAccount dengan password plain text
                 user = UserAccount.objects.create(
                     user_id=uuid.uuid4(),
                     username=username,
-                    password=password_hash
+                    password=password
                 )
                 
                 # Get atau create role
@@ -128,23 +127,15 @@ def register_form_view(request):
 
 def verify_password(stored_password, input_password):
     """
-    Verifikasi password yang support kedua jenis:
-    - Password yang sudah di-hash (SHA256)
-    - Password plain text (dari SQL manual)
+    Verifikasi password plain text
     """
-    password_hash = hashlib.sha256(input_password.encode()).hexdigest()
-    
-    # Cek apakah stored password adalah SHA256 hash (64 karakter)
-    if len(stored_password) == 64 and all(c in '0123456789abcdef' for c in stored_password.lower()):
-        # Password sudah di-hash, bandingkan dengan hash
-        return stored_password == password_hash
-    else:
-        # Password plain text, bandingkan langsung
-        return stored_password == input_password
+    return stored_password == input_password
 
 
 def login_view(request):
     """View untuk halaman login"""
+    login_error = None  # Variable untuk menyimpan error login
+    
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -152,30 +143,34 @@ def login_view(request):
             password = form.cleaned_data['password']
             
             try:
+                # Cari user berdasarkan username
                 user = UserAccount.objects.get(username=username)
                 
+                # Verifikasi password (support hash dan plain text)
                 if verify_password(user.password, password):
-                    # --- BAGIAN PENTING: Ambil Role buat Fitur Hijau ---
+                    # Ambil role user
                     account_role = AccountRole.objects.filter(user_id=user.user_id).first()
-                    role_name = account_role.role.role_name.lower() if account_role else 'guest'
-
+                    role_obj = account_role.role if account_role else None
+                    role_name = role_obj.role_name if role_obj else 'unknown'
+                    
                     # Set session
                     request.session['user_id'] = str(user.user_id)
                     request.session['username'] = user.username
-                    request.session['role'] = role_name  # Simpan role di sini!
                     request.session['logged_in'] = True
+                    request.session['role'] = role_name  # Set role di session
                     
+                    # Tampilkan notifikasi hanya di dashboard, bukan di halaman login
                     messages.success(request, f'Login berhasil! Selamat datang, {username}')
                     return redirect('web:dashboard')
                 else:
-                    messages.error(request, 'Username atau password salah!')
+                    login_error = 'Username atau password salah!'
                 
             except UserAccount.DoesNotExist:
-                messages.error(request, 'Username atau password salah!')
+                login_error = 'Username atau password salah!'
     else:
         form = LoginForm()
     
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'login.html', {'form': form, 'login_error': login_error})
 
 def logout_view(request):
     """View untuk logout"""
@@ -195,15 +190,57 @@ def dashboard_view(request):
         user_id = request.session.get('user_id')
         user = UserAccount.objects.get(user_id=user_id)
         
-        # Ambil role user
+        # Ambil role user dan pastikan lowercase untuk konsistensi pengecekan di template
         account_role = AccountRole.objects.filter(user_id=user_id).first()
         role_obj = account_role.role if account_role else None
-        role_name = role_obj.role_name if role_obj else 'unknown'
+        role_name = role_obj.role_name.lower() if role_obj else 'customer'
         
         context = {
             'user': user,
-            'role_name': role_name
+            'username': user.username,
+            'role_name': role_name 
         }
+        
+        # Data khusus untuk organizer
+        if role_name == 'organizer':
+            organizer = Organizer.objects.get(user_id=user_id)
+            events = Event.objects.filter(organizer_id=organizer.organizer_id)
+            context['organizer_name'] = organizer.organizer_name
+            context['active_events'] = events.count()
+        
+        # Data khusus untuk customer
+        elif role_name == 'customer':
+            customer = Customer.objects.get(user_id=user_id)
+            orders = Order.objects.filter(customer_id=customer.customer_id)
+            
+            #Hitung Total Tiket Aktif (Lunas)
+            upcoming_tickets = Ticket.objects.filter(
+                torder__customer=customer,
+                torder__payment_status='Lunas'
+            ).select_related('tcategory__tevent')
+            
+            #Hitung Acara Diikuti (Event unik yang pernah/akan didatangi)
+            acara_diikuti = Ticket.objects.filter(
+                torder__customer=customer, 
+                torder__payment_status='Lunas'
+            ).values('tcategory__tevent').distinct().count()
+
+            #Hitung Kode Promo yang sedang aktif hari ini
+            from datetime import datetime
+            now = datetime.now().date()
+            promo_tersedia = Promotion.objects.filter(start_date__lte=now, end_date__gte=now).count()
+
+            #Hitung Total Belanja (Jumlah uang yang sudah dibayar)
+            total_belanja = orders.filter(payment_status='Lunas').aggregate(total=Sum('total_amount'))['total'] or 0
+
+            # Masukkan ke context
+            context['customer_name'] = customer.full_name
+            context['active_events'] = upcoming_tickets.count()
+            context['upcoming_tickets'] = upcoming_tickets
+            context['total_tiket'] = upcoming_tickets.count()
+            context['acara_diikuti'] = acara_diikuti
+            context['promo_tersedia'] = promo_tersedia
+            context['total_belanja'] = total_belanja
         
         return render(request, 'dashboard.html', context)
         
