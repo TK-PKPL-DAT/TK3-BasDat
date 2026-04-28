@@ -306,9 +306,9 @@
             {% endif %}
 
             <!-- Buy Button -->
-            <button class="buy-btn" onclick="openBuyModal()">
+            <a href="{% url 'fitur_biru:create_order' %}?event_id={{ event.event_id }}" class="buy-btn block text-center" style="text-decoration: none;">
                 <i class="bi bi-cart"></i> Beli Tiket
-            </button>
+            </a>
         </div>
     </div>
 

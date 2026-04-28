@@ -1420,7 +1420,8 @@
         }
 
         function buyTicket(eventId) {
-            openBuyModal();
+            // Langsung tembak ke URL Fitur Biru beserta ID Event-nya
+            window.location.href = `/fitur-biru/orders/create/?event_id=${eventId}`;
         }
 
         function openBuyModal() {

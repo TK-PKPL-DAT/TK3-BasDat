@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event
+from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
-
+from django.db.models import Sum
 import uuid
 
 
@@ -212,8 +212,35 @@ def dashboard_view(request):
         elif role_name == 'customer':
             customer = Customer.objects.get(user_id=user_id)
             orders = Order.objects.filter(customer_id=customer.customer_id)
+            
+            #Hitung Total Tiket Aktif (Lunas)
+            upcoming_tickets = Ticket.objects.filter(
+                torder__customer=customer,
+                torder__payment_status='Lunas'
+            ).select_related('tcategory__tevent')
+            
+            #Hitung Acara Diikuti (Event unik yang pernah/akan didatangi)
+            acara_diikuti = Ticket.objects.filter(
+                torder__customer=customer, 
+                torder__payment_status='Lunas'
+            ).values('tcategory__tevent').distinct().count()
+
+            #Hitung Kode Promo yang sedang aktif hari ini
+            from datetime import datetime
+            now = datetime.now().date()
+            promo_tersedia = Promotion.objects.filter(start_date__lte=now, end_date__gte=now).count()
+
+            #Hitung Total Belanja (Jumlah uang yang sudah dibayar)
+            total_belanja = orders.filter(payment_status='Lunas').aggregate(total=Sum('total_amount'))['total'] or 0
+
+            # Masukkan ke context
             context['customer_name'] = customer.full_name
-            context['active_events'] = orders.count()
+            context['active_events'] = upcoming_tickets.count()
+            context['upcoming_tickets'] = upcoming_tickets
+            context['total_tiket'] = upcoming_tickets.count()
+            context['acara_diikuti'] = acara_diikuti
+            context['promo_tersedia'] = promo_tersedia
+            context['total_belanja'] = total_belanja
         
         return render(request, 'dashboard.html', context)
         
