@@ -1,7 +1,7 @@
+import uuid
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
-from web.models import AccountRole, Role 
 
 # --- HELPER FUNCTIONS ---
 
@@ -51,15 +51,20 @@ def create_artist(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         genre = request.POST.get('genre')
+        artist_id = uuid.uuid4()
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO tiktaktuk.artist (name, genre) VALUES (%s, %s)", [name, genre])
+            cursor.execute(
+                "INSERT INTO tiktaktuk.artist (artist_id, name, genre) VALUES (%s, %s, %s)",
+                [artist_id, name, genre]
+            )
         messages.success(request, f"Artist {name} berhasil ditambahkan!")
         return redirect('fitur_hijau:list_artist')
-        
+
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
 
 def update_artist(request, id):
     if get_role(request) != 'admin':
+        messages.error(request, "Akses ditolak! Cuma Admin yang bisa kelola Artist.")
         return redirect('fitur_hijau:list_artist')
 
     with connection.cursor() as cursor:
@@ -68,17 +73,27 @@ def update_artist(request, id):
             cursor.execute("UPDATE tiktaktuk.artist SET name=%s, genre=%s WHERE artist_id=%s", [name, genre, id])
             messages.success(request, f"Artist {name} berhasil diperbarui!")
             return redirect('fitur_hijau:list_artist')
-        
+
         cursor.execute("SELECT name, genre FROM tiktaktuk.artist WHERE artist_id = %s", [id])
         data = cursor.fetchone()
+
+    if not data:
+        messages.error(request, "Artist tidak ditemukan.")
+        return redirect('fitur_hijau:list_artist')
+
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Update', 'data': data})
 
 def delete_artist(request, id):
     """DELETE: Menghapus artis (Hanya Admin)"""
-    if get_role(request) == 'admin':
+    if get_role(request) != 'admin':
+        messages.error(request, "Akses ditolak! Cuma Admin yang bisa kelola Artist.")
+        return redirect('fitur_hijau:list_artist')
+
+    if request.method == 'POST':
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM tiktaktuk.artist WHERE artist_id = %s", [id])
         messages.success(request, "Artist berhasil dihapus!")
+
     return redirect('fitur_hijau:list_artist')
 
 # --- TICKET LOGIC ---

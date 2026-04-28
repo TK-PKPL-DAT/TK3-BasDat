@@ -15,9 +15,9 @@
                 <p class="text-slate-400 text-sm italic">Kelola artis yang ada di platform TikTakTuk</p>
             </div>
             {% if is_admin %}
-            <a href="{% url 'fitur_hijau:create_artist' %}" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
+            <button type="button" onclick="openArtistModal('create')" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
                 + Tambah Artist
-            </a>
+            </button>
             {% endif %}
         </div>
 
@@ -79,10 +79,8 @@
                         {% if is_admin %}
                         <td class="px-8 py-5 text-center">
                             <div class="flex justify-center gap-3">
-                                <a href="{% url 'fitur_hijau:update_artist' a.0 %}" class="text-blue-600 font-bold text-xs hover:underline">[Update]</a>
-                                <a href="{% url 'fitur_hijau:delete_artist' a.0 %}" 
-                                   onclick="return confirm('Hapus {{ a.1 }}?')" 
-                                   class="text-red-600 font-bold text-xs hover:underline">[Delete]</a>
+                                <button type="button" onclick="openArtistModal('update', '{{ a.0 }}', '{{ a.1|escapejs }}', '{{ a.2|escapejs }}')" class="text-blue-600 font-bold text-xs hover:underline">[Update]</button>
+                                <button type="button" onclick="openDeleteModal('{{ a.0 }}', '{{ a.1|escapejs }}')" class="text-red-600 font-bold text-xs hover:underline">[Delete]</button>
                             </div>
                         </td>
                         {% endif %}
@@ -98,5 +96,110 @@
             </table>
         </div>
     </div>
+
+    {% if is_admin %}
+    <div id="artistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-6">
+        <div class="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="p-8">
+                <div class="flex items-start justify-between gap-4 mb-8">
+                    <div>
+                        <h2 id="artistModalTitle" class="text-2xl font-black text-slate-800"></h2>
+                        <p class="text-slate-400 text-sm mt-2">Isi form artist untuk ditambahkan atau diperbarui.</p>
+                    </div>
+                    <button type="button" onclick="hideModals()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+                </div>
+
+                <form id="artistModalForm" method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nama Artis</label>
+                        <input id="artistName" type="text" name="name" value="" required
+                               class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="cth. Fourtwnty">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Genre</label>
+                        <input id="artistGenre" type="text" name="genre" value="" required
+                               class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="cth. Indie Folk">
+                    </div>
+                    <div class="flex flex-wrap gap-4 mt-8">
+                        <button type="button" onclick="hideModals()" class="flex-1 min-w-[120px] border border-slate-200 bg-white text-slate-700 px-5 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all">Batal</button>
+                        <button id="artistModalSubmit" type="submit" class="flex-1 min-w-[120px] bg-blue-600 text-white px-5 py-3 rounded-2xl font-black hover:bg-blue-700 transition-all">Tambah Artis</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteArtistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-6">
+        <div class="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-red-700">Hapus Artis</h2>
+                        <p class="text-slate-500 text-sm mt-2">Apakah Anda yakin ingin menghapus artis ini? Tindakan ini tidak dapat dibatalkan.</p>
+                    </div>
+                    <button type="button" onclick="hideModals()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+                </div>
+
+                <form id="deleteArtistForm" method="POST">
+                    {% csrf_token %}
+                    <p id="deleteArtistLabel" class="text-slate-700 font-bold mb-8"></p>
+                    <div class="flex flex-wrap gap-4">
+                        <button type="button" onclick="hideModals()" class="flex-1 min-w-[120px] border border-slate-200 bg-white text-slate-700 px-5 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all">Batal</button>
+                        <button type="submit" class="flex-1 min-w-[120px] bg-red-600 text-white px-5 py-3 rounded-2xl font-black hover:bg-red-700 transition-all">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const createArtistUrl = "{% url 'fitur_hijau:create_artist' %}";
+        const updateArtistUrlTemplate = "{% url 'fitur_hijau:update_artist' '00000000-0000-0000-0000-000000000000' %}";
+        const deleteArtistUrlTemplate = "{% url 'fitur_hijau:delete_artist' '00000000-0000-0000-0000-000000000000' %}";
+
+        function openArtistModal(mode, id = '', name = '', genre = '') {
+            const modal = document.getElementById('artistModal');
+            const form = document.getElementById('artistModalForm');
+            const title = document.getElementById('artistModalTitle');
+            const submit = document.getElementById('artistModalSubmit');
+            const inputName = document.getElementById('artistName');
+            const inputGenre = document.getElementById('artistGenre');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            inputName.value = name || '';
+            inputGenre.value = genre || '';
+
+            if (mode === 'update') {
+                title.textContent = 'Edit Artis';
+                submit.textContent = 'Simpan Perubahan';
+                form.action = updateArtistUrlTemplate.replace('00000000-0000-0000-0000-000000000000', id);
+            } else {
+                title.textContent = 'Tambah Artis Baru';
+                submit.textContent = 'Tambah Artis';
+                form.action = createArtistUrl;
+            }
+        }
+
+        function openDeleteModal(id, name) {
+            const modal = document.getElementById('deleteArtistModal');
+            const form = document.getElementById('deleteArtistForm');
+            const label = document.getElementById('deleteArtistLabel');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            label.textContent = `Hapus artis: ${name}`;
+            form.action = deleteArtistUrlTemplate.replace('00000000-0000-0000-0000-000000000000', id);
+        }
+
+        function hideModals() {
+            document.getElementById('artistModal').classList.add('hidden');
+            document.getElementById('artistModal').classList.remove('flex');
+            document.getElementById('deleteArtistModal').classList.add('hidden');
+            document.getElementById('deleteArtistModal').classList.remove('flex');
+        }
+    </script>
+    {% endif %}
 </body>
 </html>
