@@ -24,7 +24,7 @@
                 <h1 class="text-4xl font-black text-slate-800 tracking-tight">Daftar Artis</h1>
                 <p class="text-slate-400 text-sm italic mt-2">Ketela artis yang ada di platform TikTakTuk</p>
             </div>
-            {% if is_admin %}
+            {% if can_manage %}
             <button type="button" onclick="openArtistModal('create')" class="bg-[#2563EB] text-white px-5 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
                 + Tambah Artist
             </button>
@@ -34,7 +34,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Artist</p>
-                <h3 class="text-3xl font-black text-slate-800">{{ total_artist|default:artis|length }}</h3>
+                <h3 class="text-3xl font-black text-slate-800">{{ total_artis|default:artis|length }}</h3>
             </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Genre</p>
@@ -50,11 +50,13 @@
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h2 class="font-black text-slate-800">Tabel Artis</h2>
                 
-                <div class="relative w-64">
-                    <input type="text" placeholder="Cari nama atau genre..." 
-                           class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:border-blue-500">
-                    <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
-                </div>
+                <form method="GET" action="{% url 'fitur_hijau:list_artist' %}" class="relative w-64">
+                    <input type="text" name="search" value="{{ search }}" placeholder="Cari nama atau genre..." 
+                        class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    <button type="submit" class="absolute left-3 top-2.5 text-slate-400 hover:text-blue-500 transition-colors">
+                        🔍
+                    </button>
+                </form>
             </div>
 
             <table class="w-full text-left">
@@ -63,7 +65,7 @@
                         <th class="px-8 py-4">Artist ID</th>
                         <th class="px-8 py-4">Name (Nama Artist)</th>
                         <th class="px-8 py-4">Genre</th>
-                        {% if is_admin %}<th class="px-8 py-4 text-center">Action</th>{% endif %}
+                        {% if can_manage %}<th class="px-8 py-4 text-center">Action</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -86,7 +88,7 @@
                             </span>
                         </td>
                         
-                        {% if is_admin %}
+                        {% if can_manage %}
                         <td class="px-8 py-5 text-center">
                             <div class="flex justify-center gap-3">
                                 <button type="button" onclick="openArtistModal('update', '{{ a.0 }}', '{{ a.1|escapejs }}', '{{ a.2|escapejs }}')" class="text-blue-600 font-bold text-xs hover:underline">[Update]</button>
@@ -97,7 +99,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if is_admin %}4{% else %}3{% endif %}" class="px-8 py-10 text-center text-slate-400 italic">
+                        <td colspan="{% if can_manage %}4{% else %}3{% endif %}" class="px-8 py-10 text-center text-slate-400 italic">
                             Data artist tidak ditemukan.
                         </td>
                     </tr>
@@ -108,7 +110,7 @@
         <div class="mt-6 text-center"><a href="{% url 'fitur_hijau:list_ticket' %}" class="text-blue-600 font-bold hover:underline italic">Kelola Kategori Tiket &rarr;</a></div>
     </div>
 
-    {% if is_admin %}
+    {% if can_manage %}
     <div id="artistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-6">
         <div class="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden">
             <div class="p-8">
