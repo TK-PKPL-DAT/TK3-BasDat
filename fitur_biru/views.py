@@ -21,7 +21,7 @@ def order_list(request):
     """Menampilkan daftar order berdasarkan role (R-Order)"""
     sess = get_session_data(request)
     if not sess['is_logged_in']:
-        return redirect('login')
+        return redirect('web:login')
 
     # filter Role
     if sess['role'] == 'admin':

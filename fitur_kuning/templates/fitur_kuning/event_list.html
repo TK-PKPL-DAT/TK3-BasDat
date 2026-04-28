@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jelajahi Acara - Event Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * {
             margin: 0;
@@ -63,7 +64,7 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #4299e1;
+            border-color: #2563eb;
         }
 
         .filter-row {
@@ -94,7 +95,7 @@
 
         .filter-select:focus {
             outline: none;
-            border-color: #4299e1;
+            border-color: #2563eb;
         }
 
         .events-grid {
@@ -176,7 +177,7 @@
         .artist-tag {
             display: inline-block;
             background: #f0f0f0;
-            color: #4299e1;
+            color: #2563eb;
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -207,7 +208,7 @@
         .event-price {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #4299e1;
+            color: #2563eb;
             margin-bottom: 1rem;
         }
 
@@ -220,8 +221,8 @@
 
         .ticket-badge {
             display: inline-block;
-            background: #e8eaf6;
-            color: #4299e1;
+            background: #dbeafe;
+            color: #2563eb;
             padding: 0.3rem 0.7rem;
             border-radius: 4px;
             font-size: 0.8rem;
@@ -231,7 +232,7 @@
         .buy-btn {
             width: 100%;
             padding: 0.75rem;
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 20px;
@@ -283,7 +284,7 @@
 
         .form-group button {
             padding: 0.75rem 1.5rem;
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 20px;
@@ -330,7 +331,7 @@
             padding: 2rem;
             border-radius: 12px;
             width: 90%;
-            max-width: 600px;
+            max-width: 1000px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             animation: slideUp 0.3s;
         }
@@ -373,8 +374,10 @@
             margin-bottom: 1.5rem;
         }
 
-        .form-group-modal {
-            margin-bottom: 1.5rem;
+        .modal-body-2col .modal-body-left,
+        .modal-body-2col .modal-body-right {
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         .form-group-modal label {
@@ -403,13 +406,104 @@
         .form-group-modal select:focus,
         .form-group-modal textarea:focus {
             outline: none;
-            border-color: #4299e1;
+            border-color: #2563eb;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
+        }
+
+        .modal-body-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .modal-body-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-body-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .artist-selection-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            min-height: 60px;
+            align-content: flex-start;
+        }
+
+        .artist-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .artist-tag:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+        .artist-tag.selected {
+            background: #2563eb;
+            color: white;
+        }
+
+        .artist-list-dropdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            border-top: none;
+        }
+
+        .artist-option {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .artist-option:hover {
+            background: #f0f0f0;
+            border-color: #2563eb;
+        }
+
+        .artist-option.selected {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
         }
 
         .ticket-category-section {
@@ -500,13 +594,17 @@
         }
 
         .btn-submit {
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border-radius: 20px;
         }
 
         .btn-submit:hover {
             opacity: 0.9;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         .header {
@@ -528,7 +626,7 @@
 
         .btn-create-event {
             padding: 0.75rem 1.5rem;
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 20px;
@@ -546,8 +644,8 @@
         .btn-home {
             padding: 0.75rem 1.5rem;
             background: white;
-            color: #4299e1;
-            border: 2px solid #4299e1;
+            color: #2563eb;
+            border: 2px solid #2563eb;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
@@ -560,7 +658,7 @@
         }
 
         .btn-home:hover {
-            background: #4299e1;
+            background: #2563eb;
             color: white;
         }
 
@@ -580,7 +678,7 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background: #4299e1;
+            background: #2563eb;
             color: white;
             border: none;
             cursor: pointer;
@@ -773,6 +871,24 @@
         {% endif %}
     </div>
 
+    <!-- Modal Pembelian Tiket - Coming Soon -->
+    <div id="buyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
+            <!-- Header Modal -->
+            <div class="text-center mb-8">
+                <button type="button" onclick="closeBuyModal()" class="float-right text-slate-400 hover:text-slate-600 text-2xl font-bold transition-colors" style="margin-top: -2rem;">&times;</button>
+                <div class="text-6xl mb-4">🎉</div>
+                <h2 class="text-3xl font-black text-slate-800 mb-2">Fitur Segera Hadir</h2>
+                <p class="text-slate-500 text-sm">Pembelian tiket akan segera tersedia</p>
+            </div>
+
+            <!-- Button -->
+            <button type="button" onclick="closeBuyModal()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all uppercase tracking-widest text-sm">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
     <!-- Modal Create Event -->
     <div id="createEventModal" class="modal">
         <div class="modal-content">
@@ -781,68 +897,79 @@
                 <button class="modal-close" onclick="closeModal('createEventModal')">&times;</button>
             </div>
 
-            <div class="modal-body">
-                <!-- Event Title -->
-                <div class="form-group-modal">
-                    <label>Judul Acara (Event_Title)</label>
-                    <input type="text" id="eventTitle" placeholder="cth. Konser Melodi Senja">
-                </div>
-
-                <!-- Date & Time -->
-                <div class="form-row">
+            <div class="modal-body modal-body-2col">
+                <!-- LEFT COLUMN -->
+                <div class="modal-body-left">
+                    <!-- Event Title -->
                     <div class="form-group-modal">
-                        <label>Tanggal (Date)</label>
-                        <input type="date" id="eventDate" placeholder="mm / dd / yyyy">
+                        <label>Judul Acara (Event_Title)</label>
+                        <input type="text" id="eventTitle" placeholder="cth. Konser Melodi Senja">
                     </div>
-                    <div class="form-group-modal">
-                        <label>Waktu (Time)</label>
-                        <input type="time" id="eventTime" placeholder="-- : -- --">
-                    </div>
-                </div>
 
-                <!-- Venue -->
-                <div class="form-group-modal">
-                    <label>Venue (Venue_ID)</label>
-                    <select id="eventVenue">
-                        <option value="">Pilih Venue</option>
-                        {% for venue in all_venues %}
-                            <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Artists -->
-                <div class="form-group-modal">
-                    <label>Artis (Event_Artist)</label>
-                    <select id="artistSelect" multiple style="min-height: 100px;">
-                        {% for artist in all_artists %}
-                            <option value="{{ artist.artist_id }}">{{ artist.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Ticket Categories -->
-                <div class="form-group-modal">
-                    <label>Kategori Tiket (Ticket_Category)</label>
-                    <div id="ticketCategories">
-                        <div class="ticket-category-section">
-                            <div class="ticket-category-header">
-                                <label>Regular</label>
-                                <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
-                            </div>
-                            <div class="category-row">
-                                <input type="text" placeholder="100000" value="100000" class="category-price">
-                                <input type="number" placeholder="100" value="100" class="category-quota">
-                            </div>
+                    <!-- Date & Time -->
+                    <div class="form-row">
+                        <div class="form-group-modal">
+                            <label>Tanggal (Date)</label>
+                            <input type="date" id="eventDate" placeholder="mm / dd / yyyy">
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Waktu (Time)</label>
+                            <input type="time" id="eventTime" placeholder="-- : -- --">
                         </div>
                     </div>
-                    <button type="button" class="btn-add-category" onclick="addCategory()">+ Tambah Kategori</button>
+
+                    <!-- Venue -->
+                    <div class="form-group-modal">
+                        <label>Venue (Venue_ID)</label>
+                        <select id="eventVenue">
+                            <option value="">Pilih Venue</option>
+                            {% for venue in all_venues %}
+                                <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Artists -->
+                    <div class="form-group-modal">
+                        <label>Artis (Event_Artist)</label>
+                        <div class="artist-selection-container" id="artistSelectionContainer">
+                            <span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>
+                        </div>
+                        <div class="artist-list-dropdown" id="artistListDropdown">
+                            {% for artist in all_artists %}
+                                <button type="button" class="artist-option" onclick="toggleArtist(this, '{{ artist.artist_id }}', '{{ artist.name }}')">
+                                    {{ artist.name }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Description -->
-                <div class="form-group-modal">
-                    <label>Deskripsi</label>
-                    <textarea id="eventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
+                <!-- RIGHT COLUMN -->
+                <div class="modal-body-right">
+                    <!-- Ticket Categories -->
+                    <div class="form-group-modal">
+                        <label>Kategori Tiket (Ticket_Category)</label>
+                        <div id="ticketCategories">
+                            <div class="ticket-category-section">
+                                <div class="ticket-category-header">
+                                    <label>Regular</label>
+                                    <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
+                                </div>
+                                <div class="category-row">
+                                    <input type="text" placeholder="100000" value="100000" class="category-price">
+                                    <input type="number" placeholder="100" value="100" class="category-quota">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add-category" onclick="addCategory()">+ Tambah Kategori</button>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group-modal">
+                        <label>Deskripsi</label>
+                        <textarea id="eventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -861,57 +988,68 @@
                 <button class="modal-close" onclick="closeModal('editEventModal')">&times;</button>
             </div>
 
-            <div class="modal-body">
-                <!-- Event Title -->
-                <div class="form-group-modal">
-                    <label>Judul Acara (Event_Title)</label>
-                    <input type="text" id="editEventTitle" placeholder="cth. Konser Melodi Senja">
-                </div>
-
-                <!-- Date & Time -->
-                <div class="form-row">
+            <div class="modal-body modal-body-2col">
+                <!-- LEFT COLUMN -->
+                <div class="modal-body-left">
+                    <!-- Event Title -->
                     <div class="form-group-modal">
-                        <label>Tanggal (Date)</label>
-                        <input type="date" id="editEventDate" placeholder="mm / dd / yyyy">
+                        <label>Judul Acara (Event_Title)</label>
+                        <input type="text" id="editEventTitle" placeholder="cth. Konser Melodi Senja">
                     </div>
+
+                    <!-- Date & Time -->
+                    <div class="form-row">
+                        <div class="form-group-modal">
+                            <label>Tanggal (Date)</label>
+                            <input type="date" id="editEventDate" placeholder="mm / dd / yyyy">
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Waktu (Time)</label>
+                            <input type="time" id="editEventTime" placeholder="-- : -- --">
+                        </div>
+                    </div>
+
+                    <!-- Venue -->
                     <div class="form-group-modal">
-                        <label>Waktu (Time)</label>
-                        <input type="time" id="editEventTime" placeholder="-- : -- --">
+                        <label>Venue (Venue_ID)</label>
+                        <select id="editEventVenue">
+                            <option value="">Pilih Venue</option>
+                            {% for venue in all_venues %}
+                                <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Artists -->
+                    <div class="form-group-modal">
+                        <label>Artis (Event_Artist)</label>
+                        <div class="artist-selection-container" id="editArtistSelectionContainer">
+                            <span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>
+                        </div>
+                        <div class="artist-list-dropdown" id="editArtistListDropdown">
+                            {% for artist in all_artists %}
+                                <button type="button" class="artist-option" onclick="toggleEditArtist(this, '{{ artist.artist_id }}', '{{ artist.name }}')">
+                                    {{ artist.name }}
+                                </button>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
-                <!-- Venue -->
-                <div class="form-group-modal">
-                    <label>Venue (Venue_ID)</label>
-                    <select id="editEventVenue">
-                        <option value="">Pilih Venue</option>
-                        {% for venue in all_venues %}
-                            <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <!-- RIGHT COLUMN -->
+                <div class="modal-body-right">
+                    <!-- Ticket Categories -->
+                    <div class="form-group-modal">
+                        <label>Kategori Tiket (Ticket_Category)</label>
+                        <div id="editTicketCategories"></div>
+                        <button type="button" class="btn-add-category" onclick="addCategoryEdit()">+ Tambah Kategori</button>
+                    </div>
 
-                <!-- Artists -->
-                <div class="form-group-modal">
-                    <label>Artis (Event_Artist)</label>
-                    <select id="editArtistSelect" multiple style="min-height: 100px;">
-                        {% for artist in all_artists %}
-                            <option value="{{ artist.artist_id }}">{{ artist.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Ticket Categories -->
-                <div class="form-group-modal">
-                    <label>Kategori Tiket (Ticket_Category)</label>
-                    <div id="editTicketCategories"></div>
-                    <button type="button" class="btn-add-category" onclick="addCategoryEdit()">+ Tambah Kategori</button>
-                </div>
-
-                <!-- Description -->
-                <div class="form-group-modal">
-                    <label>Deskripsi</label>
-                    <textarea id="editEventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
+                    <!-- Description -->
+                    <div class="form-group-modal">
+                        <label>Deskripsi</label>
+                        <textarea id="editEventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -924,18 +1062,113 @@
 
     <script>
         let currentEventId = null;
+        let selectedArtists = {}; // {artistId: artistName}
+        let editSelectedArtists = {}; // {artistId: artistName} untuk edit modal
 
         function goToEventDetail(url) {
             window.location.href = url;
         }
 
         function openCreateModal() {
+            selectedArtists = {}; // Reset selected artists
+            updateArtistDisplay();
             document.getElementById('createEventModal').classList.add('active');
+        }
+
+        function toggleArtist(button, artistId, artistName) {
+            if (selectedArtists[artistId]) {
+                delete selectedArtists[artistId];
+                button.classList.remove('selected');
+            } else {
+                selectedArtists[artistId] = artistName;
+                button.classList.add('selected');
+            }
+            updateArtistDisplay();
+        }
+
+        function updateArtistDisplay() {
+            const container = document.getElementById('artistSelectionContainer');
+            
+            // Update button styles
+            document.querySelectorAll('#artistListDropdown .artist-option').forEach(btn => {
+                const artistId = btn.getAttribute('onclick').match(/'([^']+)',/)[1];
+                if (selectedArtists[artistId]) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            // Update display tags
+            if (Object.keys(selectedArtists).length === 0) {
+                container.innerHTML = '<span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>';
+            } else {
+                container.innerHTML = Object.entries(selectedArtists)
+                    .map(([id, name]) => `
+                        <button type="button" class="artist-tag selected" onclick="removeSelectedArtist('${id}')">
+                            ${name}
+                            <i class="bi bi-x" style="margin-left: 0.25rem;">×</i>
+                        </button>
+                    `)
+                    .join('');
+            }
+        }
+
+        function removeSelectedArtist(artistId) {
+            delete selectedArtists[artistId];
+            updateArtistDisplay();
+        }
+
+        function toggleEditArtist(button, artistId, artistName) {
+            if (editSelectedArtists[artistId]) {
+                delete editSelectedArtists[artistId];
+                button.classList.remove('selected');
+            } else {
+                editSelectedArtists[artistId] = artistName;
+                button.classList.add('selected');
+            }
+            updateEditArtistDisplay();
+        }
+
+        function updateEditArtistDisplay() {
+            const container = document.getElementById('editArtistSelectionContainer');
+            
+            // Update button styles
+            document.querySelectorAll('#editArtistListDropdown .artist-option').forEach(btn => {
+                const artistId = btn.getAttribute('onclick').match(/'([^']+)',/)[1];
+                if (editSelectedArtists[artistId]) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            // Update display tags
+            if (Object.keys(editSelectedArtists).length === 0) {
+                container.innerHTML = '<span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>';
+            } else {
+                container.innerHTML = Object.entries(editSelectedArtists)
+                    .map(([id, name]) => `
+                        <button type="button" class="artist-tag selected" onclick="removeEditSelectedArtist('${id}')">
+                            ${name}
+                            <i class="bi bi-x" style="margin-left: 0.25rem;">×</i>
+                        </button>
+                    `)
+                    .join('');
+            }
+        }
+
+        function removeEditSelectedArtist(artistId) {
+            delete editSelectedArtists[artistId];
+            updateEditArtistDisplay();
         }
 
         function openEditModal(eventId) {
             currentEventId = eventId;
             console.log('Opening edit modal for event:', eventId);
+            
+            // Reset editSelectedArtists
+            editSelectedArtists = {};
             
             // Fetch event data via AJAX
             fetch(`/fitur-kuning/event/${eventId}/get/`)
@@ -951,11 +1184,22 @@
                         document.getElementById('editEventTime').value = event.event_time;
                         document.getElementById('editEventVenue').value = event.venue_id;
                         
-                        // Select existing artists
-                        const artistSelect = document.getElementById('editArtistSelect');
-                        Array.from(artistSelect.options).forEach(option => {
-                            option.selected = data.artists.includes(option.value);
-                        });
+                        // Populate selected artists
+                        if (data.artists && Array.isArray(data.artists)) {
+                            data.artists.forEach(artist => {
+                                if (artist.artist_id && artist.name) {
+                                    editSelectedArtists[artist.artist_id] = artist.name;
+                                } else {
+                                    // If artists are just IDs, get the name from the dropdown
+                                    const artistBtn = Array.from(document.querySelectorAll('#editArtistListDropdown .artist-option'))
+                                        .find(btn => btn.getAttribute('onclick').includes(`'${artist}'`));
+                                    if (artistBtn) {
+                                        const artistName = artistBtn.textContent.trim();
+                                        editSelectedArtists[artist] = artistName;
+                                    }
+                                }
+                            });
+                        }
                         
                         // Clear existing categories and populate with current data
                         document.getElementById('editTicketCategories').innerHTML = '';
@@ -974,6 +1218,9 @@
                             `;
                             document.getElementById('editTicketCategories').insertAdjacentHTML('beforeend', html);
                         });
+                        
+                        // Update artist display
+                        updateEditArtistDisplay();
                         
                         // Open modal
                         document.getElementById('editEventModal').classList.add('active');
@@ -1035,8 +1282,7 @@
             const date = document.getElementById('eventDate').value;
             const time = document.getElementById('eventTime').value;
             const venueId = document.getElementById('eventVenue').value;
-            const artistSelect = document.getElementById('artistSelect');
-            const artists = Array.from(artistSelect.selectedOptions).map(opt => opt.value);
+            const artists = Object.keys(selectedArtists);
 
             if (!title || !date || !time || !venueId) {
                 alert('Harap isi semua field yang diperlukan');
@@ -1073,6 +1319,8 @@
                 if (result.success) {
                     alert(result.message);
                     closeModal('createEventModal');
+                    selectedArtists = {}; // Reset
+                    updateArtistDisplay();
                     location.reload();
                 } else {
                     alert('Error: ' + result.message);
@@ -1089,8 +1337,7 @@
             const date = document.getElementById('editEventDate').value;
             const time = document.getElementById('editEventTime').value;
             const venueId = document.getElementById('editEventVenue').value;
-            const artistSelect = document.getElementById('editArtistSelect');
-            const artists = Array.from(artistSelect.selectedOptions).map(opt => opt.value);
+            const artists = Object.keys(editSelectedArtists);
 
             if (!title || !date || !time || !venueId) {
                 alert('Harap isi semua field yang diperlukan');
@@ -1173,7 +1420,17 @@
         }
 
         function buyTicket(eventId) {
-            alert('Fitur pembelian tiket akan segera tersedia!');
+            openBuyModal();
+        }
+
+        function openBuyModal() {
+            document.getElementById('buyModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBuyModal() {
+            document.getElementById('buyModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
         // Close modal when clicking outside
@@ -1187,6 +1444,21 @@
                 closeModal('editEventModal');
             }
         }
+
+        // Close buy modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const buyModal = document.getElementById('buyModal');
+            if (e.target === buyModal) {
+                closeBuyModal();
+            }
+        });
+
+        // Keyboard shortcut (Escape untuk close)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('buyModal').classList.contains('hidden')) {
+                closeBuyModal();
+            }
+        });
     </script>
 </body>
 </html>
