@@ -23,23 +23,28 @@
                         Detail Pemesan
                     </h2>
                     
-                    <form id="checkout-form" class="space-y-5">
+                    <form id="form-pemesan" class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
-                                <input type="text" value="{{ sess.full_name }}" required
-                                    class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
+                                <input type="text" id="input-nama" value="{{ customer.full_name }}" readonly required
+                                    class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-400 italic outline-none transition-all">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Nomor Telepon</label>
-                                <input type="tel" placeholder="0812xxxx" required
-                                    class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
+                                <input type="tel" id="input-telp" value="{{ customer.phone_number|default:'' }}" readonly required
+                                    class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-400 italic outline-none transition-all">
                             </div>
                         </div>
                         <div>
                             <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Alamat Email</label>
-                            <input type="email" value="{{ sess.username }}" required
-                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
+                            <input type="email" id="input-email" value="{{ sess.username }}" readonly required
+                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-400 italic outline-none transition-all">
+                        </div>
+                        
+                        <div class="mt-4 flex items-center gap-2 pt-2">
+                            <input type="checkbox" id="check-other" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                            <label for="check-other" class="text-xs font-black text-slate-600 cursor-pointer uppercase tracking-wider">Memesan untuk orang lain?</label>
                         </div>
                     </form>
                 </div>
@@ -49,75 +54,288 @@
                         <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg text-sm">💳</span>
                         Metode Pembayaran
                     </h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <button class="border-2 border-blue-500 bg-blue-50 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" id="btn-bank" class="border-2 border-slate-200 bg-white p-4 rounded-2xl flex flex-col items-center gap-2 transition-all grayscale hover:grayscale-0">
                             <span class="text-2xl">🏦</span>
-                            <span class="text-[10px] font-black uppercase text-blue-600">Transfer Bank</span>
+                            <span id="text-bank" class="text-[10px] font-black uppercase text-slate-400">Transfer Bank</span>
                         </button>
-                        <button class="border-2 border-slate-100 hover:border-blue-200 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all grayscale hover:grayscale-0">
+                        
+                        <button type="button" id="btn-ewallet" class="border-2 border-slate-200 bg-white p-4 rounded-2xl flex flex-col items-center gap-2 transition-all grayscale hover:grayscale-0">
                             <span class="text-2xl">📱</span>
-                            <span class="text-[10px] font-black uppercase text-slate-400">E-Wallet</span>
+                            <span id="text-ewallet" class="text-[10px] font-black uppercase text-slate-400">E-Wallet & QRIS</span>
                         </button>
                     </div>
-                </div>
-            </div>
 
+                    <div id="opsi-bank" class="hidden mt-6 pt-6 border-t border-dashed border-slate-200 transition-all duration-300">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Pilih Bank</p>
+                        <div class="grid grid-cols-4 gap-3">
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-blue-800 text-sm">BCA</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-amber-500 text-sm">Livin</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-orange-600 text-sm">BNI</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-blue-600 text-sm">BRI</span></div>
+                        </div>
+                    </div>
+
+                    <div id="opsi-ewallet" class="hidden mt-6 pt-6 border-t border-dashed border-slate-200 transition-all duration-300">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Pilih E-Wallet</p>
+                        <div class="grid grid-cols-4 gap-3">
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-red-500 text-xs">QRIS</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-green-500 text-xs">GoPay</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-purple-600 text-xs">OVO</span></div>
+                            <div class="sub-payment-option border border-slate-200 rounded-xl p-3 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"><span class="font-black text-blue-500 text-xs">DANA</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>        
             <div class="lg:col-span-1">
                 <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-200 sticky top-24">
                     <h2 class="text-xl font-black text-slate-800 mb-6">Ringkasan Pesanan</h2>
                     
-                    <div class="space-y-4 mb-6">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm font-black text-slate-800">{{ event.name|default:"Nama Event Konser" }}</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{{ ticket_category|default:"VIP Section" }}</p>
-                            </div>
-                            <p class="text-sm font-bold text-slate-700">Rp {{ ticket_price|default:"1.500.000" }}</p>
-                        </div>
-                    </div>
-
-                    <hr class="border-slate-100 mb-6">
-
                     <div class="mb-6">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Punya Kode Promo?</label>
-                        <div class="flex gap-2">
-                            <input type="text" placeholder="Masukkan kode..." 
-                                class="flex-1 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500">
-                            <button class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-700 transition-all">PAKAI</button>
-                        </div>
+                        <h3 class="text-lg font-black text-slate-800 leading-tight">
+                            {{ event.event_title|default:"Nama Event" }}
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">
+                            📍 {{ event.venue.address }}, {{ event.venue.city }}
+                        </p>
                     </div>
 
-                    <div class="space-y-3 mb-8">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-400 font-medium">Subtotal</span>
-                            <span class="text-slate-700 font-bold">Rp {{ ticket_price|default:"1.500.000" }}</span>
+                    <form id="checkout-form" method="POST" action="{% url 'fitur_biru:create_order' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-6">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pilih Kategori Tiket</label>
+                            <select name="category_id" id="category_select" required 
+                                class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer">
+                                <option value="" data-price="0">-- Pilih Jenis Tiket --</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.category_id }}" data-price="{{ cat.price }}">
+                                        {{ cat.category_name }} - Rp {{ cat.price|floatformat:0 }} (Sisa: {{ cat.quota }})
+                                    </option>
+                                {% empty %}
+                                    <option value="" disabled>Tiket habis / Event tidak ditemukan</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-400 font-medium">Diskon</span>
-                            <span class="text-red-500 font-bold">- Rp 0</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-400 font-medium">Biaya Layanan</span>
-                            <span class="text-slate-700 font-bold">Rp 10.000</span>
-                        </div>
-                        <div class="pt-3 border-t border-dashed border-slate-200 flex justify-between items-center">
-                            <span class="text-slate-800 font-black uppercase text-xs tracking-widest">Total Bayar</span>
-                            <span class="text-2xl font-black text-blue-600">Rp 1.510.000</span>
-                        </div>
-                    </div>
 
-                    <div class="space-y-3">
-                        <button type="submit" form="checkout-form" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all uppercase tracking-widest">
-                            Bayar Sekarang
-                        </button>
-                        <a href="{% url 'fitur_kuning:event_list' %}" class="block text-center w-full bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all uppercase tracking-widest">
-                            Kembali
-                        </a>
-                    </div>
+                        <hr class="border-slate-100 mb-6">
+
+                        <div class="mb-6">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Punya Kode Promo?</label>
+                            <div class="flex gap-2">
+                                <input type="text" name="promo_code" placeholder="Masukkan kode..." 
+                                    class="flex-1 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500">
+                                <button type="button" id="btn-promo" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-700 transition-all">PAKAI</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-8">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-400 font-medium">Subtotal</span>
+                                <span id="display-subtotal" class="text-slate-700 font-bold">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-400 font-medium">Biaya Layanan</span>
+                                <span class="text-slate-700 font-bold">Rp 10.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm transition-all duration-300 hidden" id="row-diskon">
+                                <span class="text-slate-400 font-medium">Diskon</span>
+                                <span id="display-discount" class="text-red-500 font-bold">- Rp 0</span>
+                            </div>
+                            <div id="promo-status" class="text-[10px] font-bold hidden"></div>
+                            <div class="pt-3 border-t border-dashed border-slate-200 flex justify-between items-center">
+                                <span class="text-slate-800 font-black uppercase text-xs tracking-widest">Total Bayar</span>
+                                <span id="display-total" class="text-2xl font-black text-blue-600">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all uppercase tracking-widest">
+                                Bayar Sekarang
+                            </button>
+                            <a href="{% url 'fitur_kuning:event_list' %}" class="block text-center w-full bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all uppercase tracking-widest">
+                                Kembali
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
-
         </div>
     </div>
-</body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category_select');
+            const promoInput = document.querySelector('input[name="promo_code"]');
+            const btnPromo = document.getElementById('btn-promo');
+            
+            let selectedPrice = 0;
+            let discountAmount = 0;
+            const adminFee = 10000;
+
+            function updateDisplay() {
+                const subtotal = selectedPrice;
+                const total = (subtotal + adminFee) - discountAmount;
+
+                document.getElementById('display-subtotal').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+                document.getElementById('display-discount').innerText = '- Rp ' + discountAmount.toLocaleString('id-ID');
+                document.getElementById('display-total').innerText = 'Rp ' + Math.max(0, total).toLocaleString('id-ID');
+            }
+
+            // Poin 4: Update Subtotal saat ganti kursi
+            categorySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                selectedPrice = parseInt(selectedOption.getAttribute('data-price')) || 0;
+                updateDisplay();
+            });
+
+            // Poin 3 & 5: Validasi Promo via AJAX
+            btnPromo.addEventListener('click', async function() {
+                const code = promoInput.value;
+                if (!code) return;
+
+                const response = await fetch(`{% url 'fitur_biru:check_promo' %}?code=${code}`);
+                const data = await response.json();
+                const statusEl = document.getElementById('promo-status');
+                const rowDiskon = document.getElementById('row-diskon');
+
+                statusEl.classList.remove('hidden');
+                
+                if (data.valid) {
+                    // Hitung nilai diskon
+                    if (data.type === 'PERCENTAGE') {
+                        discountAmount = (selectedPrice * data.value) / 100;
+                    } else {
+                        discountAmount = data.value;
+                    }
+                    
+                    rowDiskon.classList.remove('hidden');
+                    statusEl.innerText = '✓ Kode promo berhasil digunakan!';
+                    statusEl.className = 'text-[10px] font-bold text-emerald-500 mt-1';
+                } else {
+                    discountAmount = 0;
+                    rowDiskon.classList.add('hidden');
+                    statusEl.innerText = '✗ Kode promo tidak valid atau expired.';
+                    statusEl.className = 'text-[10px] font-bold text-red-500 mt-1';
+                }
+                updateDisplay();
+            });
+            
+            // --- LOGIKA UI METODE PEMBAYARAN ---
+            const btnBank = document.getElementById('btn-bank');
+            const btnEwallet = document.getElementById('btn-ewallet');
+            const textBank = document.getElementById('text-bank');
+            const textEwallet = document.getElementById('text-ewallet');
+            const opsiBank = document.getElementById('opsi-bank');
+            const opsiEwallet = document.getElementById('opsi-ewallet');
+            const subOptions = document.querySelectorAll('.sub-payment-option'); // Ambil semua bocah-bocah
+
+            // Fungsi reset semua pilihan (termasuk reset pilihan bocah-bocahnya)
+            function resetPaymentButtons() {
+                [btnBank, btnEwallet].forEach(btn => {
+                    btn.classList.remove('border-blue-500', 'bg-blue-50', 'grayscale-0');
+                    btn.classList.add('border-slate-200', 'bg-white', 'grayscale');
+                });
+                [textBank, textEwallet].forEach(txt => {
+                    txt.classList.remove('text-blue-600');
+                    txt.classList.add('text-slate-400');
+                });
+                opsiBank.classList.add('hidden');
+                opsiEwallet.classList.add('hidden');
+                
+                // Reset visual bocah-bocah biar ga ada yang kepilih kalau nutup menu
+                subOptions.forEach(opt => {
+                    opt.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50');
+                    opt.classList.add('border-slate-200');
+                });
+            }
+
+            // Event klik Bank (Bisa toggle unselect)
+            btnBank.addEventListener('click', function() {
+                // Cek apakah tombol ini udah aktif. Kalau aktif, matiin.
+                if (btnBank.classList.contains('border-blue-500')) {
+                    resetPaymentButtons();
+                } else {
+                    // Kalau belum aktif, nyalain.
+                    resetPaymentButtons();
+                    btnBank.classList.remove('border-slate-200', 'bg-white', 'grayscale');
+                    btnBank.classList.add('border-blue-500', 'bg-blue-50', 'grayscale-0');
+                    textBank.classList.remove('text-slate-400');
+                    textBank.classList.add('text-blue-600');
+                    opsiBank.classList.remove('hidden');
+                }
+            });
+
+            // Event klik E-Wallet (Bisa toggle unselect)
+            btnEwallet.addEventListener('click', function() {
+                if (btnEwallet.classList.contains('border-blue-500')) {
+                    resetPaymentButtons();
+                } else {
+                    resetPaymentButtons();
+                    btnEwallet.classList.remove('border-slate-200', 'bg-white', 'grayscale');
+                    btnEwallet.classList.add('border-blue-500', 'bg-blue-50', 'grayscale-0');
+                    textEwallet.classList.remove('text-slate-400');
+                    textEwallet.classList.add('text-blue-600');
+                    opsiEwallet.classList.remove('hidden');
+                }
+            });
+
+            // Event klik buat bocah-bocahnya (opsi bank / e-wallet)
+            subOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Hapus styling "terpilih" dari semua opsi lain dulu
+                    subOptions.forEach(opt => {
+                        opt.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50');
+                        opt.classList.add('border-slate-200');
+                    });
+                    
+                    // Tambahin styling "terpilih" (ring biru tebal) ke opsi yang baru aja diklik
+                    this.classList.remove('border-slate-200');
+                    this.classList.add('ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50');
+                });
+            });
+
+            // --- LOGIKA FORM DETAIL PEMESAN ---
+            const checkOther = document.getElementById('check-other');
+            const inputNama = document.getElementById('input-nama');
+            const inputTelp = document.getElementById('input-telp');
+            const inputEmail = document.getElementById('input-email');
+
+            // Simpan data asli dari server
+            const dataAsli = {
+                nama: "{{ customer.full_name }}",
+                telp: "{{ customer.phone_number|default:'' }}",
+                email: "{{ sess.username }}"
+            };
+
+            checkOther.addEventListener('change', function() {
+                const inputs = [inputNama, inputTelp, inputEmail];
+                
+                if (this.checked) {
+                    // Jika dicentang: Kosongkan, matikan readonly, ubah gaya jadi bisa diedit
+                    inputs.forEach(input => {
+                        input.removeAttribute('readonly');
+                        input.value = '';
+                        input.classList.remove('bg-slate-50', 'text-slate-400', 'italic');
+                        input.classList.add('bg-white', 'text-slate-700', 'focus:ring-2', 'focus:ring-blue-100', 'focus:border-blue-500');
+                    });
+                    inputNama.focus(); // Arahkan kursor langsung ke input nama
+                } else {
+                    // Jika tidak dicentang: Kembalikan data asli, nyalakan readonly, ubah gaya jadi abu-abu
+                    inputs.forEach(input => {
+                        input.setAttribute('readonly', 'true');
+                        input.classList.add('bg-slate-50', 'text-slate-400', 'italic');
+                        input.classList.remove('bg-white', 'text-slate-700', 'focus:ring-2', 'focus:ring-blue-100', 'focus:border-blue-500');
+                    });
+                    inputNama.value = dataAsli.nama;
+                    inputTelp.value = dataAsli.telp;
+                    inputEmail.value = dataAsli.email;
+                }
+            });
+        });
+    </script>
+
+
+    </body> 
 </html>

@@ -501,25 +501,25 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">🎫</div>
-                <div class="stat-value">2</div>
+                <div class="stat-value">{{ total_tiket }}</div>
                 <div class="stat-label">Tiket Aktif</div>
                 <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">Siap digunakan</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📅</div>
-                <div class="stat-value">12</div>
+                <div class="stat-value">{{ acara_diikuti }}</div>
                 <div class="stat-label">Acara Diikuti</div>
                 <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">Total pengalaman</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
-                <div class="stat-value">3</div>
+                <div class="stat-value">{{ promo_tersedia }}</div>
                 <div class="stat-label">Kode Promo</div>
                 <div style="font-size: 0.8rem; color: #10b981; margin-top: 5px;">Tersedia untuk Anda</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💳</div>
-                <div class="stat-value">Rp 1.6M</div>
+                <div class="stat-value">Rp {{ total_belanja|floatformat:0 }}</div>
                 <div class="stat-label">Total Belanja</div>
                 <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">Bulan ini</div>
             </div>
@@ -535,30 +535,25 @@
                 <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">Tiket pertunjukan yang akan datang</p>
             </div>
             <ul class="item-list">
+                {% for ticket in upcoming_tickets %}
                 <li class="item-list-item">
                     <div class="item-info">
-                        <h4>Konser Melodi Senja</h4>
+                        <h4>{{ ticket.tcategory.tevent.event_title }}</h4>
                         <div class="item-meta">
-                            <span class="item-badge">WVP</span>
-                            &nbsp; 📅 15 Mei 2024 &nbsp; 📍 Jakarta Convention Center
+                            <span class="item-badge">{{ ticket.tcategory.category_name }}</span>
+                            &nbsp; 📅 {{ ticket.tcategory.tevent.event_datetime|date:"d M Y" }} &nbsp; 
+                            📍 {{ ticket.tcategory.tevent.venue.venue_name }}
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <button class="btn btn-sm btn-outline-primary">Lihat</button>
+                        <a href="{% url 'fitur_biru:order_list' %}" class="btn btn-sm btn-outline-primary">Lihat</a>
                     </div>
                 </li>
-                <li class="item-list-item">
-                    <div class="item-info">
-                        <h4>Festival Seni Budaya</h4>
-                        <div class="item-meta">
-                            <span class="item-badge">GENERAL</span>
-                            &nbsp; 📅 22 Mei 2024 &nbsp; 📍 Taman Impian Jayakarta
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button class="btn btn-sm btn-outline-primary">Lihat</button>
-                    </div>
+                {% empty %}
+                <li class="item-list-item" style="justify-content: center;">
+                    <p style="color: #9ca3af; font-style: italic; margin: 0;">Belum ada tiket yang dibeli. Yuk cari event seru!</p>
                 </li>
+                {% endfor %}
             </ul>
         </div>
     </div>
