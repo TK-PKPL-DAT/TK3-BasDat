@@ -7,6 +7,8 @@ from datetime import datetime
 from web.models import Order, Promotion, OrderPromotion, Customer, UserAccount, AccountRole, Event, TicketCategory, Ticket
 from django.db.models import Count
 from django.db import transaction, connection
+from django.db.models import Sum
+
 
 #Fungsi helper untuk cek role
 def get_session_data(request):
