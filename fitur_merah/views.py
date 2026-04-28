@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
@@ -90,6 +89,9 @@ def update_seat(request, id):
 # READ TIKET
 def list_ticket(request):
     role, u_id = get_session_data(request)
+    if role == 'guest':
+        messages.warning(request, "Silakan login untuk melihat tiket Anda.")
+        return redirect('web:login')
     query = """
         SELECT t.ticket_id, t.ticket_code, c.full_name, e.event_title, tc.category_name, s.seat_number
         FROM TICKET t
@@ -102,10 +104,10 @@ def list_ticket(request):
     """
     params = []
     if role == 'customer':
-        query += " WHERE c.user_id = %s::uuid"
+        query += " WHERE c.user_id = %s"
         params.append(u_id)
     elif role == 'organizer':
-        query += " WHERE e.organizer_id = (SELECT organizer_id FROM ORGANIZER WHERE user_id = %s::uuid)"
+        query += " WHERE e.organizer_id = (SELECT organizer_id FROM ORGANIZER WHERE user_id = %s)"
         params.append(u_id)
     with connection.cursor() as cursor:
         cursor.execute(query, params)
@@ -189,14 +191,10 @@ def update_ticket(request, id):
         return redirect('fitur_merah:list_ticket')
     
     return render(request, 'fitur_merah/form_ticket.html', {'mode': 'Update'})
-=======
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 
+# Dashboard laporan
 def report_dashboard(request):
-    """View untuk dashboard laporan"""
     context = {
         'page_title': 'Dashboard Laporan'
     }
     return render(request, 'fitur_merah/report_dashboard.html', context)
->>>>>>> main
