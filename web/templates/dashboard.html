@@ -345,15 +345,15 @@
                 <div style="margin-top: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
                         <span style="color: #6b7280; font-size: 0.95rem;">Total Venue Terdaftar</span>
-                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">3 Lokasi</span>
+                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">{{ total_venues }} Lokasi</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
-                        <span style="color: #6b7280; font-size: 0.95rem;">Reserved Seating</span>
-                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">2 Venue</span>
+                        <span style="color: #6b7280; font-size: 0.95rem;">Kapasitas Terbesar</span>
+                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">{{ max_capacity }} Kursi</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
-                        <span style="color: #6b7280; font-size: 0.95rem;">Kapasitas Terbesar</span>
-                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">1,000 Kursi</span>
+                        <span style="color: #6b7280; font-size: 0.95rem;">Reserved Seating</span>
+                        <span style="color: var(--dark); font-weight: 700; font-size: 1rem;">{{ venues_with_reserved_seating }} Venue</span>
                     </div>
                     <a href="{% url 'fitur_kuning:venue_list' %}" class="btn btn-primary btn-sm-action w-100" style="margin-top: 20px; background-color: #f3f4f6; color: var(--dark); border: 1px solid #e5e7eb; font-weight: 600; text-decoration: none; display: block; text-align: center;">
                         Kelola Venue

@@ -107,11 +107,18 @@
                 {% elif role_name == 'organizer' %}
                     <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Event Saya</a>
                     <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Venue</a>
+                    <a href="{% url 'fitur_hijau:list_ticket' %}" class="btn-nav hover-hijau">Kategori Tiket</a>
+                    <a href="{% url 'fitur_merah:list_seat' %}" class="btn-nav hover-merah">Manajemen Kursi</a>
+                    <a href="{% url 'fitur_merah:list_ticket' %}" class="btn-nav hover-merah">Manajemen Tiket</a>
                     <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Order</a>
 
                 {% elif role_name == 'customer' %}
                     <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Pesanan Saya</a>
+                    <a href="{% url 'fitur_hijau:list_ticket' %}" class="btn-nav hover-hijau">Tiket</a>
                     <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Cari Event</a>
+                    <a href="{% url 'fitur_biru:promotion_list' %}" class="btn-nav hover-biru">Promosi</a>
+                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Venue</a>
+                    <a href="{% url 'fitur_hijau:list_artist' %}" class="btn-nav hover-hijau">Artis</a>
                 {% endif %}
 
                 <a href="{% url 'web:logout' %}" class="btn-nav btn-logout">Logout</a>

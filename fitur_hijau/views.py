@@ -67,12 +67,21 @@ def create_artist(request):
         return redirect('fitur_hijau:list_artist')
 
     if request.method == 'POST':
-        name = request.POST.get('name')
-        genre = request.POST.get('genre')
-        with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO tiktaktuk.artist (name, genre) VALUES (%s, %s)", [name, genre])
-        messages.success(request, f"Artist {name} berhasil ditambahkan!")
-        return redirect('fitur_hijau:list_artist')
+        name = request.POST.get('name', '').strip()
+        genre = request.POST.get('genre', '').strip()
+        
+        if not name or not genre:
+            messages.error(request, "Nama dan Genre tidak boleh kosong!")
+            return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
+        
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO tiktaktuk.artist (name, genre) VALUES (%s, %s)", [name, genre])
+            messages.success(request, f"✅ Artist '{name}' berhasil ditambahkan!")
+            return redirect('fitur_hijau:list_artist')
+        except Exception as e:
+            messages.error(request, f"❌ Error: {str(e)}")
+            return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
         
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Tambah'})
 
@@ -84,23 +93,54 @@ def update_artist(request, id):
 
     with connection.cursor() as cursor:
         if request.method == 'POST':
-            name, genre = request.POST.get('name'), request.POST.get('genre')
-            cursor.execute("UPDATE tiktaktuk.artist SET name=%s, genre=%s WHERE artist_id=%s", [name, genre, id])
-            messages.success(request, f"Artist {name} berhasil diperbarui!")
-            return redirect('fitur_hijau:list_artist')
+            name = request.POST.get('name', '').strip()
+            genre = request.POST.get('genre', '').strip()
+            
+            if not name or not genre:
+                messages.error(request, "Nama dan Genre tidak boleh kosong!")
+                cursor.execute("SELECT name, genre FROM tiktaktuk.artist WHERE artist_id = %s", [id])
+                data = cursor.fetchone()
+                return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Update', 'data': data})
+            
+            try:
+                cursor.execute("UPDATE tiktaktuk.artist SET name=%s, genre=%s WHERE artist_id=%s", [name, genre, id])
+                messages.success(request, f"✅ Artist '{name}' berhasil diperbarui!")
+                return redirect('fitur_hijau:list_artist')
+            except Exception as e:
+                messages.error(request, f"❌ Error: {str(e)}")
+                cursor.execute("SELECT name, genre FROM tiktaktuk.artist WHERE artist_id = %s", [id])
+                data = cursor.fetchone()
+                return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Update', 'data': data})
         
         cursor.execute("SELECT name, genre FROM tiktaktuk.artist WHERE artist_id = %s", [id])
         data = cursor.fetchone()
+        
+        if not data:
+            messages.error(request, "Artist tidak ditemukan!")
+            return redirect('fitur_hijau:list_artist')
+    
     return render(request, 'fitur_hijau/form_artist.html', {'mode': 'Update', 'data': data})
 
 def delete_artist(request, id):
     """DELETE: Menghapus artis (Hanya Admin)"""
-    if get_role(request) == 'admin':
+    if get_role(request) != 'admin':
+        messages.error(request, "❌ Akses ditolak! Cuma Admin yang bisa hapus Artist.")
+        return redirect('fitur_hijau:list_artist')
+    
+    try:
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM tiktaktuk.artist WHERE artist_id = %s", [id])
-        messages.success(request, "Artist berhasil dihapus!")
-    else:
-        messages.error(request, "Akses ditolak! Cuma Admin yang bisa hapus Artist.")
+            # Ambil nama artist dulu untuk pesan
+            cursor.execute("SELECT name FROM tiktaktuk.artist WHERE artist_id = %s", [id])
+            artist_name = cursor.fetchone()
+            
+            if artist_name:
+                cursor.execute("DELETE FROM tiktaktuk.artist WHERE artist_id = %s", [id])
+                messages.success(request, f"✅ Artist '{artist_name[0]}' berhasil dihapus!")
+            else:
+                messages.error(request, "❌ Artist tidak ditemukan!")
+    except Exception as e:
+        messages.error(request, f"❌ Error: {str(e)}")
+    
     return redirect('fitur_hijau:list_artist')
 
 # --- TICKET LOGIC ---
