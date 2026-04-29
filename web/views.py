@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion
+from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion, Venue, Seat
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
 from django.db.models import Sum
 import uuid
@@ -241,6 +241,24 @@ def dashboard_view(request):
             context['acara_diikuti'] = acara_diikuti
             context['promo_tersedia'] = promo_tersedia
             context['total_belanja'] = total_belanja
+        
+        # Data khusus untuk admin
+        elif role_name == 'admin':
+            from django.db.models import Max
+            
+            # Hitung data infrastruktur venue
+            venues = Venue.objects.all()
+            total_venues = venues.count()
+            max_capacity = venues.aggregate(Max('capacity'))['capacity__max'] or 0
+            
+            # Hitung venue dengan reserved seating (section yang mengandung 'reserved')
+            venues_with_reserved_seating = Seat.objects.filter(
+                section__icontains='reserved'
+            ).values('venue_id').distinct().count()
+            
+            context['total_venues'] = total_venues
+            context['max_capacity'] = max_capacity
+            context['venues_with_reserved_seating'] = venues_with_reserved_seating
         
         return render(request, 'dashboard.html', context)
         
