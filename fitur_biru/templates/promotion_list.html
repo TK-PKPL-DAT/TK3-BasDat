@@ -85,10 +85,7 @@
                                 <button onclick="openEditModal('{{ promo.promotion_id }}', '{{ promo.promo_code|escapejs }}', '{{ promo.discount_type }}', '{{ promo.discount_value }}', '{{ promo.start_date|date:"Y-m-d" }}', '{{ promo.end_date|date:"Y-m-d" }}', '{{ promo.usage_limit }}')" 
                                     class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">Edit</button>
                                 
-                                <form action="{% url 'fitur_biru:delete_promotion' promo.promotion_id %}" method="POST" class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" onclick="return confirm('Yakin hapus promo ini?')" title="Hapus">Hapus</button>
-                                </form>
+                                <button onclick="openDeletePromoModal('{% url 'fitur_biru:delete_promotion' promo.promotion_id %}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Hapus Promo">Hapus</button>
                             </div>
                         </td>
                         {% endif %}
@@ -154,6 +151,28 @@
         </div>
     </div>
 
+    <!-- Delete Promo Modal -->
+    <div id="deletePromoModal" class="fixed inset-0 z-[1050] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="p-6 flex justify-between items-start">
+                <h2 class="text-xl font-bold text-red-600">Hapus Promo</h2>
+                <button onclick="closeModalById('deletePromoModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+            </div>
+            
+            <div class="px-6 pb-6 text-sm text-slate-500">
+                Apakah Anda yakin ingin menghapus promo ini? Tindakan ini tidak dapat dibatalkan.
+            </div>
+            
+            <div class="px-6 pb-6 flex justify-end gap-3">
+                <button type="button" onclick="closeModalById('deletePromoModal')" class="px-5 py-2.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+                <form id="deletePromoForm" action="" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const modal = document.getElementById('promo-modal');
         const form = document.getElementById('promo-form');
@@ -192,6 +211,20 @@
 
         function closeModal() {
             modal.classList.replace('flex', 'hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function openDeletePromoModal(actionUrl) {
+            const form = document.getElementById('deletePromoForm');
+            form.action = actionUrl;
+            const deleteModal = document.getElementById('deletePromoModal');
+            deleteModal.classList.replace('hidden', 'flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModalById(id) {
+            const deleteModal = document.getElementById(id);
+            deleteModal.classList.replace('flex', 'hidden');
             document.body.style.overflow = 'auto';
         }
     </script>
