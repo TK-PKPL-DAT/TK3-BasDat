@@ -3,1463 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jelajahi Acara - Event Booking</title>
+    <title>Jelajahi Acara - TikTakTuk</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F8FAFC;
             color: #333;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: left;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            color: #666;
-        }
-
-        .search-filter-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .search-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .filter-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .filter-select {
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
+        /* Custom Styles for Components not covered by Tailwind */
         .event-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f5f9;
         }
 
         .event-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        .event-banner {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #4299e1 0%, #4299e1 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            position: relative;
-            color: white;
-        }
-
-        .favorite-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: none;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
-
-        .favorite-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .favorite-btn.active {
-            color: red;
-        }
-
-        .event-content {
-            padding: 1.5rem;
-        }
-
-        .event-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 0.75rem;
-            color: #333;
-        }
-
-        .event-artists {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .artist-tag {
-            display: inline-block;
-            background: #f0f0f0;
-            color: #2563eb;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .event-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .info-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-
-        .info-icon {
-            font-size: 1.1rem;
-            color: #4299e1;
-            min-width: 20px;
-        }
-
-        .event-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 1rem;
-        }
-
-        .ticket-categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .ticket-badge {
-            display: inline-block;
-            background: #dbeafe;
-            color: #2563eb;
-            padding: 0.3rem 0.7rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .buy-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        .buy-btn:hover {
-            opacity: 0.9;
-        }
-
-        .no-events {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .no-events p {
-            font-size: 1.1rem;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .filter-row {
-                grid-template-columns: 1fr;
-            }
-
-            .events-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .navbar-links {
-                display: none;
-            }
-        }
-
-        .form-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .form-group button {
-            padding: 0.75rem 1.5rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.3s;
-        }
-
-        .form-group button:hover {
-            opacity: 0.9;
-        }
-
-        .form-group button.reset {
-            background: #ccc;
-            color: #333;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 1000px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: #333;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.3s;
-        }
-
-        .modal-close:hover {
-            color: #333;
-        }
-
-        .modal-body {
-            max-height: 70vh;
-            overflow-y: auto;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-body-2col .modal-body-left,
-        .modal-body-2col .modal-body-right {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .form-group-modal label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .form-group-modal input,
-        .form-group-modal select,
-        .form-group-modal textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-group-modal input:focus,
-        .form-group-modal select:focus,
-        .form-group-modal textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .modal-body-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .modal-body-left {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .modal-body-right {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .artist-selection-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 0.75rem;
-            padding: 0.75rem;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            min-height: 60px;
-            align-content: flex-start;
-        }
-
-        .artist-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .artist-tag:hover {
-            background: #1976d2;
-            color: white;
-        }
-
-        .artist-tag.selected {
-            background: #2563eb;
-            color: white;
-        }
-
-        .artist-list-dropdown {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 0.75rem;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            border-top: none;
-        }
-
-        .artist-option {
-            background: white;
-            border: 1px solid #e0e0e0;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .artist-option:hover {
-            background: #f0f0f0;
-            border-color: #2563eb;
-        }
-
-        .artist-option.selected {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
-
-        .ticket-category-section {
-            background: #f9f9f9;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid #e0e0e0;
-        }
-
-        .ticket-category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .ticket-category-header label {
-            margin-bottom: 0;
-        }
-
-        .btn-remove-category {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            transition: opacity 0.3s;
-        }
-
-        .btn-remove-category:hover {
-            opacity: 0.8;
-        }
-
-        .category-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .btn-add-category {
-            color: #4299e1;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-top: 0.5rem;
-            transition: opacity 0.3s;
-        }
-
-        .btn-add-category:hover {
-            opacity: 0.8;
-            text-decoration: underline;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            padding-top: 1rem;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .btn-cancel, .btn-submit {
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: opacity 0.3s;
-        }
-
-        .btn-cancel {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-cancel:hover {
-            opacity: 0.8;
-        }
-
-        .btn-submit {
-            background: #2563eb;
-            color: white;
-            border-radius: 20px;
-        }
-
-        .btn-submit:hover {
-            opacity: 0.9;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
-        }
-
-        .header-text {
-            flex: 1;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-create-event {
-            padding: 0.75rem 1.5rem;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: opacity 0.3s;
-            white-space: nowrap;
-        }
-
-        .btn-create-event:hover {
-            opacity: 0.9;
-        }
-
-        .btn-home {
-            padding: 0.75rem 1.5rem;
-            background: white;
-            color: #2563eb;
-            border: 2px solid #2563eb;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-home:hover {
-            background: #2563eb;
-            color: white;
-        }
-
-        .event-actions {
-            position: absolute;
-            top: 50px;
-            right: 10px;
-            display: none;
-            gap: 0.5rem;
-        }
-
-        .event-card:hover .event-actions {
-            display: flex;
-        }
-
-        .event-actions button {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #2563eb;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            transition: transform 0.2s;
-        }
-
-        .event-actions button:hover {
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .header-actions {
-                margin-top: 1rem;
-                justify-content: center;
-            }
-
-            .filter-row {
-                grid-template-columns: 1fr;
-            }
-
-            .events-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .navbar-links {
-                display: none;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .category-row {
-                grid-template-columns: 1fr;
-            }
+        .modal-active {
+            display: flex !important;
         }
     </style>
 </head>
-<body>
-    <!-- Header Template -->
+<body class="bg-[#F8FAFC]">
+    
     {% include 'header.html' %}
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-text">
-                <h1>Jelajahi Acara</h1>
-                <p>Temukan acara terbaik dan beli tiket favorit Anda</p>
+    <div class="max-w-7xl mx-auto p-10">
+        
+        <div class="flex justify-between items-start mb-10">
+            <div>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Jelajahi Acara</h1>
+                <p class="text-slate-400 text-sm italic mt-2">Temukan dan pesan tiket untuk berbagai acara menarik di sekitar Anda</p>
             </div>
-            {% if is_admin_or_organizer %}
-                <div class="header-actions">
-                    <button class="btn-create-event" onclick="openCreateModal()">+ Buat Acara Baru</button>
-                </div>
+            
+            {% if request.session.role == 'admin' or request.session.role == 'organizer' %}
+            <button onclick="openModal('createEventModal')" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                <span>+</span> Tambah Acara
+            </button>
             {% endif %}
         </div>
 
-        <!-- Search and Filter -->
-        <div class="search-filter-section">
-            <form method="get" action="{% url 'fitur_kuning:event_list' %}">
-                <div class="search-container">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        class="search-input" 
-                        placeholder="Cari acara atau artis..."
-                        value="{{ search_query }}"
-                    >
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Total Acara</p>
+                <p class="text-4xl font-black text-slate-800">{{ events|length }}</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Tiket Tersedia</p>
+                <p class="text-4xl font-black text-slate-800">1.250</p> </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Kapasitas Venue</p>
+                <p class="text-4xl font-black text-blue-600">85%</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8">
+            <form method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="search" placeholder="Cari nama acara atau lokasi..." 
+                           class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg outline-none focus:border-blue-500 transition-all"
+                           value="{{ search_query }}">
                 </div>
-
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="venue">Semua Venue</label>
-                        <select name="venue" id="venue" class="filter-select">
-                            <option value="">Semua Venue</option>
-                            {% for venue in all_venues %}
-                                <option value="{{ venue.venue_id }}" {% if venue.venue_id|stringformat:"s" == venue_filter %}selected{% endif %}>
-                                    {{ venue.venue_name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="artist">Semua Artis</label>
-                        <select name="artist" id="artist" class="filter-select">
-                            <option value="">Semua Artis</option>
-                            {% for artist in all_artists %}
-                                <option value="{{ artist.artist_id }}" {% if artist.artist_id|stringformat:"s" == artist_filter %}selected{% endif %}>
-                                    {{ artist.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
-                    <button type="submit">Cari</button>
-                    <button type="reset" class="reset">Reset</button>
+                <div class="w-full md:w-auto">
+                    <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-3 rounded-lg font-bold transition-all">
+                        Cari Acara
+                    </button>
                 </div>
             </form>
         </div>
 
-        <!-- Events Grid -->
-        {% if events_data %}
-            <div class="events-grid">
-                {% for event_info in events_data %}
-                    {% with event=event_info.event artists=event_info.artists categories=event_info.categories min_price=event_info.min_price %}
-                        <div class="event-card" onclick="goToEventDetail('{% url 'fitur_kuning:event_detail' event.event_id %}')">
-                            <!-- Banner -->
-                            <div class="event-banner">
-                                🎵
-                                <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(this)">♡</button>
-                                {% if is_admin_or_organizer %}
-                                    <div class="event-actions">
-                                        <button type="button" onclick="event.stopPropagation(); openEditModal('{{ event.event_id }}'); return false;">✏️</button>
-                                    </div>
-                                {% endif %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% if events %}
+                {% for event in events %}
+                <div class="event-card shadow-sm border border-slate-100 flex flex-col">
+                    <div class="h-48 bg-slate-200 flex items-center justify-center text-slate-400 text-5xl">
+                        🖼️
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                                {{ event.event_category|default:"General" }}
+                            </span>
+                            <span class="text-slate-400 text-xs font-medium">
+                                📅 {{ event.event_date }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">{{ event.event_name }}</h3>
+                        <p class="text-slate-500 text-sm mb-6 line-clamp-2">{{ event.description }}</p>
+                        
+                        <div class="mt-auto pt-6 border-t border-slate-50 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Mulai Dari</p>
+                                <p class="text-lg font-black text-blue-600">Rp 150.000</p>
                             </div>
-
-                            <!-- Content -->
-                            <div class="event-content">
-                                <!-- Title -->
-                                <div class="event-title">{{ event.event_title }}</div>
-
-                                <!-- Artists/Category Tags -->
-                                {% if artists %}
-                                    <div class="event-artists">
-                                        {% for artist in artists %}
-                                            <span class="artist-tag">{{ artist.name }}</span>
-                                        {% endfor %}
-                                    </div>
+                            
+                            <div class="flex gap-2">
+                                {% if request.session.role == 'admin' or request.session.role == 'organizer' %}
+                                <button onclick="openEditModal('{{ event.event_id }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">
+                                    Edit
+                                </button>
                                 {% endif %}
-
-                                <!-- Event Info -->
-                                <div class="event-info">
-                                    <!-- Date & Time -->
-                                    <div class="info-row">
-                                        <span class="info-icon">📅</span>
-                                        <span>{{ event.event_datetime|date:"d M Y - H:i" }}</span>
-                                    </div>
-
-                                    <!-- Location -->
-                                    <div class="info-row">
-                                        <span class="info-icon">📍</span>
-                                        <span>{{ event.venue.venue_name }}, {{ event.venue.city }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Price -->
-                                <div class="event-price">
-                                    Mulai Rp {{ min_price|floatformat:0 }}
-                                </div>
-
-                                <!-- Ticket Categories -->
-                                {% if categories %}
-                                    <div class="ticket-categories">
-                                        {% for cat in categories %}
-                                            <span class="ticket-badge">{{ cat.category_name }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-
-                                <!-- Buy Button -->
-                                <button class="buy-btn" onclick="event.stopPropagation(); buyTicket('{{ event.event_id }}'); return false;">
+                                <button onclick="handleBuyTicket('{{ event.event_id }}')" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 transition-all">
                                     Beli Tiket
                                 </button>
                             </div>
                         </div>
-                    {% endwith %}
+                    </div>
+                </div>
                 {% endfor %}
-            </div>
-        {% else %}
-            <div class="no-events">
-                <p>Tidak ada event yang ditemukan.</p>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Modal Pembelian Tiket - Coming Soon -->
-    <div id="buyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
-            <!-- Header Modal -->
-            <div class="text-center mb-8">
-                <button type="button" onclick="closeBuyModal()" class="float-right text-slate-400 hover:text-slate-600 text-2xl font-bold transition-colors" style="margin-top: -2rem;">&times;</button>
-                <div class="text-6xl mb-4">🎉</div>
-                <h2 class="text-3xl font-black text-slate-800 mb-2">Fitur Segera Hadir</h2>
-                <p class="text-slate-500 text-sm">Pembelian tiket akan segera tersedia</p>
-            </div>
-
-            <!-- Button -->
-            <button type="button" onclick="closeBuyModal()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all uppercase tracking-widest text-sm">
-                Mengerti
-            </button>
+            {% else %}
+                <div class="col-span-full text-center py-20">
+                    <p class="text-5xl mb-4">🎫</p>
+                    <p class="text-slate-400 font-bold italic">Belum ada acara yang terdaftar.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Modal Create Event -->
-    <div id="createEventModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Buat Acara Baru</h2>
-                <button class="modal-close" onclick="closeModal('createEventModal')">&times;</button>
+    <div id="createEventModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-slate-800">Tambah Acara Baru</h2>
+                <button onclick="closeModal('createEventModal')" class="text-slate-400 hover:text-slate-600">✕</button>
             </div>
-
-            <div class="modal-body modal-body-2col">
-                <!-- LEFT COLUMN -->
-                <div class="modal-body-left">
-                    <!-- Event Title -->
-                    <div class="form-group-modal">
-                        <label>Judul Acara (Event_Title)</label>
-                        <input type="text" id="eventTitle" placeholder="cth. Konser Melodi Senja">
-                    </div>
-
-                    <!-- Date & Time -->
-                    <div class="form-row">
-                        <div class="form-group-modal">
-                            <label>Tanggal (Date)</label>
-                            <input type="date" id="eventDate" placeholder="mm / dd / yyyy">
-                        </div>
-                        <div class="form-group-modal">
-                            <label>Waktu (Time)</label>
-                            <input type="time" id="eventTime" placeholder="-- : -- --">
-                        </div>
-                    </div>
-
-                    <!-- Venue -->
-                    <div class="form-group-modal">
-                        <label>Venue (Venue_ID)</label>
-                        <select id="eventVenue">
-                            <option value="">Pilih Venue</option>
-                            {% for venue in all_venues %}
-                                <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Artists -->
-                    <div class="form-group-modal">
-                        <label>Artis (Event_Artist)</label>
-                        <div class="artist-selection-container" id="artistSelectionContainer">
-                            <span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>
-                        </div>
-                        <div class="artist-list-dropdown" id="artistListDropdown">
-                            {% for artist in all_artists %}
-                                <button type="button" class="artist-option" onclick="toggleArtist(this, '{{ artist.artist_id }}', '{{ artist.name }}')">
-                                    {{ artist.name }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN -->
-                <div class="modal-body-right">
-                    <!-- Ticket Categories -->
-                    <div class="form-group-modal">
-                        <label>Kategori Tiket (Ticket_Category)</label>
-                        <div id="ticketCategories">
-                            <div class="ticket-category-section">
-                                <div class="ticket-category-header">
-                                    <label>Regular</label>
-                                    <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
-                                </div>
-                                <div class="category-row">
-                                    <input type="text" placeholder="100000" value="100000" class="category-price">
-                                    <input type="number" placeholder="100" value="100" class="category-quota">
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-add-category" onclick="addCategory()">+ Tambah Kategori</button>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group-modal">
-                        <label>Deskripsi</label>
-                        <textarea id="eventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
-                    </div>
-                </div>
             </div>
-
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('createEventModal')">Batal</button>
-                <button class="btn-submit" onclick="submitCreateEvent()">Buat Acara</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Event -->
-    <div id="editEventModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Acara</h2>
-                <button class="modal-close" onclick="closeModal('editEventModal')">&times;</button>
-            </div>
-
-            <div class="modal-body modal-body-2col">
-                <!-- LEFT COLUMN -->
-                <div class="modal-body-left">
-                    <!-- Event Title -->
-                    <div class="form-group-modal">
-                        <label>Judul Acara (Event_Title)</label>
-                        <input type="text" id="editEventTitle" placeholder="cth. Konser Melodi Senja">
-                    </div>
-
-                    <!-- Date & Time -->
-                    <div class="form-row">
-                        <div class="form-group-modal">
-                            <label>Tanggal (Date)</label>
-                            <input type="date" id="editEventDate" placeholder="mm / dd / yyyy">
-                        </div>
-                        <div class="form-group-modal">
-                            <label>Waktu (Time)</label>
-                            <input type="time" id="editEventTime" placeholder="-- : -- --">
-                        </div>
-                    </div>
-
-                    <!-- Venue -->
-                    <div class="form-group-modal">
-                        <label>Venue (Venue_ID)</label>
-                        <select id="editEventVenue">
-                            <option value="">Pilih Venue</option>
-                            {% for venue in all_venues %}
-                                <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Artists -->
-                    <div class="form-group-modal">
-                        <label>Artis (Event_Artist)</label>
-                        <div class="artist-selection-container" id="editArtistSelectionContainer">
-                            <span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>
-                        </div>
-                        <div class="artist-list-dropdown" id="editArtistListDropdown">
-                            {% for artist in all_artists %}
-                                <button type="button" class="artist-option" onclick="toggleEditArtist(this, '{{ artist.artist_id }}', '{{ artist.name }}')">
-                                    {{ artist.name }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN -->
-                <div class="modal-body-right">
-                    <!-- Ticket Categories -->
-                    <div class="form-group-modal">
-                        <label>Kategori Tiket (Ticket_Category)</label>
-                        <div id="editTicketCategories"></div>
-                        <button type="button" class="btn-add-category" onclick="addCategoryEdit()">+ Tambah Kategori</button>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group-modal">
-                        <label>Deskripsi</label>
-                        <textarea id="editEventDescription" placeholder="Deskripsi acara..." rows="4"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('editEventModal')">Batal</button>
-                <button class="btn-submit" onclick="submitEditEvent()">Simpan</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        let currentEventId = null;
-        let selectedArtists = {}; // {artistId: artistName}
-        let editSelectedArtists = {}; // {artistId: artistName} untuk edit modal
-
-        function goToEventDetail(url) {
-            window.location.href = url;
-        }
-
-        function openCreateModal() {
-            selectedArtists = {}; // Reset selected artists
-            updateArtistDisplay();
-            document.getElementById('createEventModal').classList.add('active');
-        }
-
-        function toggleArtist(button, artistId, artistName) {
-            if (selectedArtists[artistId]) {
-                delete selectedArtists[artistId];
-                button.classList.remove('selected');
-            } else {
-                selectedArtists[artistId] = artistName;
-                button.classList.add('selected');
-            }
-            updateArtistDisplay();
-        }
-
-        function updateArtistDisplay() {
-            const container = document.getElementById('artistSelectionContainer');
-            
-            // Update button styles
-            document.querySelectorAll('#artistListDropdown .artist-option').forEach(btn => {
-                const artistId = btn.getAttribute('onclick').match(/'([^']+)',/)[1];
-                if (selectedArtists[artistId]) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-            
-            // Update display tags
-            if (Object.keys(selectedArtists).length === 0) {
-                container.innerHTML = '<span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>';
-            } else {
-                container.innerHTML = Object.entries(selectedArtists)
-                    .map(([id, name]) => `
-                        <button type="button" class="artist-tag selected" onclick="removeSelectedArtist('${id}')">
-                            ${name}
-                            <i class="bi bi-x" style="margin-left: 0.25rem;">×</i>
-                        </button>
-                    `)
-                    .join('');
-            }
-        }
-
-        function removeSelectedArtist(artistId) {
-            delete selectedArtists[artistId];
-            updateArtistDisplay();
-        }
-
-        function toggleEditArtist(button, artistId, artistName) {
-            if (editSelectedArtists[artistId]) {
-                delete editSelectedArtists[artistId];
-                button.classList.remove('selected');
-            } else {
-                editSelectedArtists[artistId] = artistName;
-                button.classList.add('selected');
-            }
-            updateEditArtistDisplay();
-        }
-
-        function updateEditArtistDisplay() {
-            const container = document.getElementById('editArtistSelectionContainer');
-            
-            // Update button styles
-            document.querySelectorAll('#editArtistListDropdown .artist-option').forEach(btn => {
-                const artistId = btn.getAttribute('onclick').match(/'([^']+)',/)[1];
-                if (editSelectedArtists[artistId]) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-            
-            // Update display tags
-            if (Object.keys(editSelectedArtists).length === 0) {
-                container.innerHTML = '<span style="color: #999; font-size: 0.9rem;">Pilih artist dari list di bawah</span>';
-            } else {
-                container.innerHTML = Object.entries(editSelectedArtists)
-                    .map(([id, name]) => `
-                        <button type="button" class="artist-tag selected" onclick="removeEditSelectedArtist('${id}')">
-                            ${name}
-                            <i class="bi bi-x" style="margin-left: 0.25rem;">×</i>
-                        </button>
-                    `)
-                    .join('');
-            }
-        }
-
-        function removeEditSelectedArtist(artistId) {
-            delete editSelectedArtists[artistId];
-            updateEditArtistDisplay();
-        }
-
-        function openEditModal(eventId) {
-            currentEventId = eventId;
-            console.log('Opening edit modal for event:', eventId);
-            
-            // Reset editSelectedArtists
-            editSelectedArtists = {};
-            
-            // Fetch event data via AJAX
-            fetch(`/fitur-kuning/event/${eventId}/get/`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Received data:', data);
-                    if (data.success) {
-                        const event = data.event;
-                        
-                        // Populate form fields
-                        document.getElementById('editEventTitle').value = event.event_title;
-                        document.getElementById('editEventDate').value = event.event_date;
-                        document.getElementById('editEventTime').value = event.event_time;
-                        document.getElementById('editEventVenue').value = event.venue_id;
-                        
-                        // Populate selected artists
-                        if (data.artists && Array.isArray(data.artists)) {
-                            data.artists.forEach(artist => {
-                                if (artist.artist_id && artist.name) {
-                                    editSelectedArtists[artist.artist_id] = artist.name;
-                                } else {
-                                    // If artists are just IDs, get the name from the dropdown
-                                    const artistBtn = Array.from(document.querySelectorAll('#editArtistListDropdown .artist-option'))
-                                        .find(btn => btn.getAttribute('onclick').includes(`'${artist}'`));
-                                    if (artistBtn) {
-                                        const artistName = artistBtn.textContent.trim();
-                                        editSelectedArtists[artist] = artistName;
-                                    }
-                                }
-                            });
-                        }
-                        
-                        // Clear existing categories and populate with current data
-                        document.getElementById('editTicketCategories').innerHTML = '';
-                        data.categories.forEach((category, idx) => {
-                            const html = `
-                                <div class="ticket-category-section">
-                                    <div class="ticket-category-header">
-                                        <label>${category.name}</label>
-                                        <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
-                                    </div>
-                                    <div class="category-row">
-                                        <input type="text" placeholder="450000" class="category-price" value="${category.price}">
-                                        <input type="number" placeholder="300" class="category-quota" value="${category.quota}">
-                                    </div>
-                                </div>
-                            `;
-                            document.getElementById('editTicketCategories').insertAdjacentHTML('beforeend', html);
-                        });
-                        
-                        // Update artist display
-                        updateEditArtistDisplay();
-                        
-                        // Open modal
-                        document.getElementById('editEventModal').classList.add('active');
-                    } else {
-                        console.error('Error from backend:', data.message);
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    alert('Terjadi kesalahan saat memuat data event');
-                });
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function addCategory() {
-            const categoryCount = document.querySelectorAll('#ticketCategories .ticket-category-section').length + 1;
-            const html = `
-                <div class="ticket-category-section">
-                    <div class="ticket-category-header">
-                        <label>Category ${categoryCount}</label>
-                        <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
-                    </div>
-                    <div class="category-row">
-                        <input type="text" placeholder="450000" class="category-price">
-                        <input type="number" placeholder="300" class="category-quota">
-                    </div>
-                </div>
-            `;
-            document.getElementById('ticketCategories').insertAdjacentHTML('beforeend', html);
-        }
-
-        function addCategoryEdit() {
-            const categoryCount = document.querySelectorAll('#editTicketCategories .ticket-category-section').length + 1;
-            const html = `
-                <div class="ticket-category-section">
-                    <div class="ticket-category-header">
-                        <label>Category ${categoryCount}</label>
-                        <button type="button" class="btn-remove-category" onclick="removeCategory(this)">×</button>
-                    </div>
-                    <div class="category-row">
-                        <input type="text" placeholder="450000" class="category-price">
-                        <input type="number" placeholder="300" class="category-quota">
-                    </div>
-                </div>
-            `;
-            document.getElementById('editTicketCategories').insertAdjacentHTML('beforeend', html);
-        }
-
-        function removeCategory(btn) {
-            btn.closest('.ticket-category-section').remove();
-        }
-
-        function submitCreateEvent() {
-            const title = document.getElementById('eventTitle').value;
-            const date = document.getElementById('eventDate').value;
-            const time = document.getElementById('eventTime').value;
-            const venueId = document.getElementById('eventVenue').value;
-            const artists = Object.keys(selectedArtists);
-
-            if (!title || !date || !time || !venueId) {
-                alert('Harap isi semua field yang diperlukan');
-                return;
-            }
-
-            const categories = [];
-            document.querySelectorAll('#ticketCategories .ticket-category-section').forEach((section, idx) => {
-                const name = section.querySelector('.ticket-category-header label').textContent.trim();
-                const price = section.querySelector('.category-price').value;
-                const quota = section.querySelector('.category-quota').value;
-                categories.push({ name, price: parseFloat(price) || 0, quota: parseInt(quota) || 0 });
-            });
-
-            const data = {
-                event_title: title,
-                event_date: formatDate(date),
-                event_time: time,
-                venue_id: venueId,
-                artists: artists,
-                ticket_categories: categories,
-            };
-
-            fetch('{% url "fitur_kuning:create_event" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    closeModal('createEventModal');
-                    selectedArtists = {}; // Reset
-                    updateArtistDisplay();
-                    location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan');
-            });
-        }
-
-        function submitEditEvent() {
-            const title = document.getElementById('editEventTitle').value;
-            const date = document.getElementById('editEventDate').value;
-            const time = document.getElementById('editEventTime').value;
-            const venueId = document.getElementById('editEventVenue').value;
-            const artists = Object.keys(editSelectedArtists);
-
-            if (!title || !date || !time || !venueId) {
-                alert('Harap isi semua field yang diperlukan');
-                return;
-            }
-
-            const categories = [];
-            document.querySelectorAll('#editTicketCategories .ticket-category-section').forEach((section, idx) => {
-                const name = section.querySelector('.ticket-category-header label').textContent.trim();
-                const price = section.querySelector('.category-price').value;
-                const quota = section.querySelector('.category-quota').value;
-                categories.push({ 
-                    name, 
-                    price: parseFloat(price) || 0, 
-                    quota: parseInt(quota) || 0 
-                });
-            });
-
-            const data = {
-                event_title: title,
-                event_date: formatDate(date),
-                event_time: time,
-                venue_id: venueId,
-                artists: artists,
-                ticket_categories: categories,
-            };
-
-            console.log('Submitting edit data:', data);
-
-            fetch(`/fitur-kuning/event/${currentEventId}/edit/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Edit result:', result);
-                if (result.success) {
-                    alert(result.message);
-                    closeModal('editEventModal');
-                    location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Submit error:', error);
-                alert('Terjadi kesalahan');
-            });
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${month}/${day}/${year}`;
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        function toggleFavorite(btn) {
-            btn.classList.toggle('active');
-        }
-
-        function buyTicket(eventId) {
-            // Langsung tembak ke URL Fitur Biru beserta ID Event-nya
-            window.location.href = `/fitur-biru/orders/create/?event_id=${eventId}`;
-        }
-
-        function openBuyModal() {
-            document.getElementById('buyModal').classList.remove('hidden');
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
-        function closeBuyModal() {
-            document.getElementById('buyModal').classList.add('hidden');
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const createModal = document.getElementById('createEventModal');
-            const editModal = document.getElementById('editEventModal');
-            if (event.target === createModal) {
-                closeModal('createEventModal');
-            }
-            if (event.target === editModal) {
-                closeModal('editEventModal');
-            }
+        function handleBuyTicket(eventId) {
+            window.location.href = `/fitur-biru/orders/create/?event_id=${eventId}`;
         }
-
-        // Close buy modal when clicking outside
-        document.addEventListener('click', function(e) {
-            const buyModal = document.getElementById('buyModal');
-            if (e.target === buyModal) {
-                closeBuyModal();
-            }
-        });
-
-        // Keyboard shortcut (Escape untuk close)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !document.getElementById('buyModal').classList.contains('hidden')) {
-                closeBuyModal();
-            }
-        });
     </script>
 </body>
 </html>

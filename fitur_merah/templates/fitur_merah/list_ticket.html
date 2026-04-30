@@ -10,16 +10,14 @@
 <body class="bg-[#F8FAFC] min-h-screen text-slate-800">
     
     {% include 'header.html' %}
-
-    <div class="p-8">
-        <div class="max-w-5xl mx-auto">
+        <div class="max-w-7xl mx-auto p-10">
             
-            <div class="flex justify-between items-start mb-8">
+            <div class="flex justify-between items-start mb-10">
                 <div>
-                    <h1 class="text-2xl font-bold mb-1">
+                    <h1 class="text-4xl font-black text-slate-800 tracking-tight">
                         {% if role == 'customer' %}Tiket Saya{% else %}Manajemen Tiket{% endif %}
                     </h1>
-                    <p class="text-slate-500 text-sm">Kelola tiket: tambah, ubah status, dan hapus tiket</p>
+                    <p class="text-slate-400 text-sm italic mt-2">Kelola tiket: tambah, ubah status, dan hapus tiket</p>
                 </div>
                 
                 {% if messages %}
@@ -33,8 +31,8 @@
                 {% endif %}
 
                 {% if is_admin or role == 'organizer' %}
-                <a href="{% url 'fitur_merah:create_ticket' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
-                    + Tambah Tiket
+                <a href="{% url 'fitur_merah:create_ticket' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <span>+</span> Tambah Tiket
                 </a>
                 {% endif %}
             </div>
@@ -98,8 +96,8 @@
 
                         {% if is_admin %}
                         <div class="mt-6 flex gap-3">
-                            <a href="{% url 'fitur_merah:update_ticket' t.0 %}" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-100 transition-colors">✏ Update</a>
-                            <a href="{% url 'fitur_merah:delete_ticket' t.0 %}" onclick="return confirm('Apakah Anda yakin ingin menghapus tiket ini?')" class="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">🗑️ Hapus</a>
+                            <a href="{% url 'fitur_merah:update_ticket' t.0 %}" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">Edit</a>
+                            <a href="{% url 'fitur_merah:delete_ticket' t.0 %}" onclick="return confirm('Apakah Anda yakin ingin menghapus tiket ini?')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" title="Hapus">Hapus</a>
                         </div>
                         {% endif %}
                     </div>
@@ -116,6 +114,5 @@
                 {% endfor %}
             </div>
         </div>
-    </div>
 </body>
 </html>

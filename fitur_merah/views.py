@@ -191,10 +191,3 @@ def update_ticket(request, id):
         return redirect('fitur_merah:list_ticket')
     
     return render(request, 'fitur_merah/form_ticket.html', {'mode': 'Update'})
-
-# Dashboard laporan
-def report_dashboard(request):
-    context = {
-        'page_title': 'Dashboard Laporan'
-    }
-    return render(request, 'fitur_merah/report_dashboard.html', context)

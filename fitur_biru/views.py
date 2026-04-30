@@ -205,10 +205,7 @@ def checkout_view(request):
 def promotion_list(request):
     """Menampilkan daftar promosi (R-Promotion) """
     sess = get_session_data(request)
-    
-    if sess.get('role') != 'admin':
-        return redirect('web:dashboard')
-    
+
     #Ambil semua promo & hitung berapa kali masing-masing promo sudah digunakan 
     promotions = Promotion.objects.annotate(
         usage_count=Count('orderpromotion')

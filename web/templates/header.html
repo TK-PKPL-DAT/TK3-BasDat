@@ -47,12 +47,12 @@
         text-align: center;
     }
 
-    .btn-home { background-color: #111827; color: white; }
-    .btn-home:hover { background-color: #374151; }
-    .hover-biru:hover { color: #2563eb; background-color: #eff6ff; border-color: #bfdbfe; }
-    .hover-kuning:hover { color: #854d0e; background-color: #fefce8; border-color: #fef08a; }
-    .hover-hijau:hover { color: #166534; background-color: #f0fdf4; border-color: #bbf7d0; }
-    .hover-merah:hover { color: #991b1b; background-color: #fef2f2; border-color: #fecaca; }
+    /* Class active & hover yang disatukan */
+    .hover-hitam:hover, .active-hitam { color: #111827; background-color: #f3f4f6; border-color: #e5e7eb; }
+    .hover-biru:hover, .active-biru { color: #2563eb; background-color: #eff6ff; border-color: #bfdbfe; }
+    .hover-kuning:hover, .active-kuning { color: #854d0e; background-color: #fefce8; border-color: #fef08a; }
+    .hover-hijau:hover, .active-hijau { color: #166534; background-color: #f0fdf4; border-color: #bbf7d0; }
+    .hover-merah:hover, .active-merah { color: #991b1b; background-color: #fef2f2; border-color: #fecaca; }
     
     .btn-logout { color: #ef4444; }
     .btn-logout:hover { background-color: #fee2e2; border-color: #fecaca; }
@@ -75,6 +75,22 @@
         .btn-nav { width: 100%; padding: 0.75rem; }
         .btn-logout { margin-left: 0; margin-top: 0.5rem; border-top: 1px solid #f3f4f6; border-radius: 0; }
     }
+    
+    /* Dropdown Profile Custom (Fallback non-Tailwind) */
+    .profile-dropdown-container { position: relative; display: inline-block; }
+    .profile-dropdown-menu {
+        position: absolute; right: 0; top: 100%; margin-top: 0.5rem; width: 12rem;
+        background-color: #ffffff; border-radius: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #f3f4f6; opacity: 0; visibility: hidden;
+        transition: all 0.2s; z-index: 50;
+    }
+    .profile-dropdown-container:hover .profile-dropdown-menu { opacity: 1; visibility: visible; }
+    .profile-dropdown-item {
+        display: block; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600;
+        color: #374151; text-decoration: none; transition: color 0.2s, background-color 0.2s;
+    }
+    .profile-dropdown-item:hover { background-color: #eff6ff; color: #2563eb; }
 
 </style>
 
@@ -92,34 +108,53 @@
 
         <div class="nav-menu" id="nav-menu-container">
             {% if not request.session.logged_in %}
-                <a href="{% url 'web:login' %}" class="btn-nav hover-biru">Login</a>
-                <a href="{% url 'web:register' %}" class="btn-nav btn-home">Registrasi</a>
-            {% else %}
-                <a href="{% url 'web:dashboard' %}" class="btn-nav btn-home">Dashboard</a>
-
-                {% if role_name == 'admin' %}
-                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Manajemen Venue</a>
-                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Semua Order</a>
-                    <a href="{% url 'fitur_biru:promotion_list' %}" class="btn-nav hover-biru">Promosi</a>
-                    <a href="{% url 'fitur_merah:report_dashboard' %}" class="btn-nav hover-merah">Laporan</a>
-                    <a href="{% url 'fitur_hijau:list_artist' %}" class="btn-nav hover-hijau">Artis</a>
+                {% url 'web:login' as url_login %}
+                <a href="{{ url_login }}" class="btn-nav hover-biru {% if request.path == url_login %}active-biru{% endif %}">Login</a>
                 
-                {% elif role_name == 'organizer' %}
-                    <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Event Saya</a>
-                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Venue</a>
-                    <a href="{% url 'fitur_hijau:list_ticket' %}" class="btn-nav hover-hijau">Kategori Tiket</a>
-                    <a href="{% url 'fitur_merah:list_seat' %}" class="btn-nav hover-merah">Manajemen Kursi</a>
-                    <a href="{% url 'fitur_merah:list_ticket' %}" class="btn-nav hover-merah">Manajemen Tiket</a>
-                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Order</a>
+                {% url 'web:register' as url_register %}
+                <a href="{{ url_register }}" class="btn-nav hover-hitam {% if request.path == url_register %}active-hitam{% endif %}">Registrasi</a>
+            {% else %}
+                
+                {% url 'web:dashboard' as url_dash %}
+                <a href="{{ url_dash }}" class="btn-nav hover-hitam {% if request.path == url_dash %}active-hitam{% endif %}">Dashboard</a>
+                
+                <!-- Unified Navigation Bar for All Users -->
+                {% url 'fitur_kuning:event_list' as url_event %}
+                <a href="{{ url_event }}" class="btn-nav hover-kuning {% if url_event in request.path %}active-kuning{% endif %}">Event</a>
+                
+                {% url 'fitur_kuning:venue_list' as url_venue %}
+                <a href="{{ url_venue }}" class="btn-nav hover-kuning {% if url_venue in request.path %}active-kuning{% endif %}">Venue</a>
+                
+                {% url 'fitur_hijau:list_artist' as url_artist %}
+                <a href="{{ url_artist }}" class="btn-nav hover-hijau {% if url_artist in request.path %}active-hijau{% endif %}">Artis</a>
+                
+                {% url 'fitur_hijau:list_ticket' as url_kategori %}
+                <a href="{{ url_kategori }}" class="btn-nav hover-hijau {% if url_kategori in request.path %}active-hijau{% endif %}">Kategori Tiket</a>
+                
+                {% url 'fitur_merah:list_seat' as url_seat %}
+                <a href="{{ url_seat }}" class="btn-nav hover-merah {% if url_seat in request.path %}active-merah{% endif %}">Seat</a>
+                
+                {% url 'fitur_merah:list_ticket' as url_ticket %}
+                <a href="{{ url_ticket }}" class="btn-nav hover-merah {% if url_ticket in request.path %}active-merah{% endif %}">Tiket</a>
+                
+                {% url 'fitur_biru:order_list' as url_order %}
+                <a href="{{ url_order }}" class="btn-nav hover-biru {% if url_order in request.path %}active-biru{% endif %}">Order</a>
+                
+                {% url 'fitur_biru:promotion_list' as url_promo %}
+                <a href="{{ url_promo }}" class="btn-nav hover-biru {% if url_promo in request.path %}active-biru{% endif %}">Promosi</a>
 
-                {% elif role_name == 'customer' %}
-                    <a href="{% url 'fitur_biru:order_list' %}" class="btn-nav hover-biru">Pesanan Saya</a>
-                    <a href="{% url 'fitur_hijau:list_ticket' %}" class="btn-nav hover-hijau">Tiket</a>
-                    <a href="{% url 'fitur_kuning:event_list' %}" class="btn-nav hover-kuning">Cari Event</a>
-                    <a href="{% url 'fitur_biru:promotion_list' %}" class="btn-nav hover-biru">Promosi</a>
-                    <a href="{% url 'fitur_kuning:venue_list' %}" class="btn-nav hover-kuning">Venue</a>
-                    <a href="{% url 'fitur_hijau:list_artist' %}" class="btn-nav hover-hijau">Artis</a>
-                {% endif %}
+                {% url 'web:profile' as url_profile %}
+                <div class="profile-dropdown-container">
+                    <button class="btn-nav hover-hitam" style="display:inline-flex; align-items:center; gap:0.25rem;">
+                        Profile
+                        <svg style="width:1rem; height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="profile-dropdown-menu">
+                        <div style="padding:0.5rem 0;">
+                            <a href="{{ url_profile }}" class="profile-dropdown-item">Profil Saya</a>
+                        </div>
+                    </div>
+                </div>
 
                 <a href="{% url 'web:logout' %}" class="btn-nav btn-logout">Logout</a>
             {% endif %}
@@ -128,7 +163,6 @@
 </nav>
 
 <script>
-    // Script Mobile Navbar
     document.addEventListener('DOMContentLoaded', function() {
         const toggleButton = document.getElementById('mobile-toggle');
         const navMenu = document.getElementById('nav-menu-container');

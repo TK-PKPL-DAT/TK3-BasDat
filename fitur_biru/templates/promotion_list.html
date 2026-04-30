@@ -82,13 +82,13 @@
                         
                         {% if sess.role == 'admin' %}
                         <td class="px-8 py-5 text-center">
-                            <div class="flex justify-center gap-3">
+                            <div class="flex justify-center gap-2 flex-wrap">
                                 <button onclick="openEditModal('{{ promo.promotion_id }}', '{{ promo.promo_code|escapejs }}', '{{ promo.discount_type }}', '{{ promo.discount_value }}', '{{ promo.start_date|date:"Y-m-d" }}', '{{ promo.end_date|date:"Y-m-d" }}', '{{ promo.usage_limit }}')" 
-                                    class="text-blue-600 font-bold text-xs hover:underline bg-blue-50 px-3 py-1.5 rounded-lg">Edit</button>
+                                    class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">Edit</button>
                                 
                                 <form action="{% url 'fitur_biru:delete_promotion' promo.promotion_id %}" method="POST" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="text-red-600 font-bold text-xs hover:underline bg-red-50 px-3 py-1.5 rounded-lg" onclick="return confirm('Yakin hapus promo ini?')">Hapus</button>
+                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" onclick="return confirm('Yakin hapus promo ini?')" title="Hapus">Hapus</button>
                                 </form>
                             </div>
                         </td>

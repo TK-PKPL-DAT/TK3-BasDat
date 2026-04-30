@@ -22,7 +22,7 @@
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-10">
             <div>
-                <h1 class="text-4xl font-black text-slate-900 tracking-tight">🎤 Daftar Artis</h1>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Daftar Artis</h1>
                 <p class="text-slate-500 text-sm italic mt-2">Kelola artis yang tampil di event TikTakTuk</p>
             </div>
             {% if can_manage %}
@@ -99,10 +99,10 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center gap-2 flex-wrap">
                                     <button onclick="openEditModal('{{ a.0 }}', '{{ a.1 }}', '{{ a.2 }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">
-                                        <i class="bi bi-pencil-square"></i> Edit
+                                        Edit
                                     </button>
                                     <button onclick="openDeleteModal('{{ a.0 }}', '{{ a.1 }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" title="Hapus">
-                                        <i class="bi bi-trash3"></i> Hapus
+                                       Hapus
                                     </button>
                                 </div>
                             </td>
@@ -120,24 +120,9 @@
                 </table>
             </div>
 
-            {% if not can_manage %}
-            <div class="p-6 bg-blue-50 border-t border-blue-200 text-center">
-                <p class="text-blue-700 text-sm font-semibold">
-                    <i class="bi bi-info-circle"></i> Anda hanya dapat melihat data artis. Untuk mengelola, login sebagai Admin.
-                </p>
-            </div>
-            {% endif %}
+
         </div>
 
-        <!-- Navigation Links -->
-        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <a href="{% url 'fitur_hijau:list_ticket' %}" class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-bold transition-colors">
-                <i class="bi bi-arrow-right"></i> Kelola Kategori Tiket
-            </a>
-            <a href="{% url 'web:dashboard' %}" class="flex items-center gap-2 text-slate-600 hover:text-slate-700 font-bold transition-colors">
-                <i class="bi bi-house-door"></i> Kembali ke Dashboard
-            </a>
-        </div>
     </div>
 
     <!-- ===== MODALS ===== -->

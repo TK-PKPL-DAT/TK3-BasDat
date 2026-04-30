@@ -12,5 +12,4 @@ urlpatterns = [
     path('tickets/tambah/', views.create_ticket, name='create_ticket'),
     path('tickets/edit/<uuid:id>/', views.update_ticket, name='update_ticket'),
     path('tickets/hapus/<uuid:id>/', views.delete_ticket, name='delete_ticket'),
-    path('report/', views.report_dashboard, name='report_dashboard'),
 ]

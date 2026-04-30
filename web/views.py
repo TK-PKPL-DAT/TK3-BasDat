@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion, Venue, Seat
+from .models import UserAccount, Role, Customer, Organizer, AccountRole, Order, Event, Ticket, Promotion, Venue, Seat, OrderPromotion, TicketCategory
 from .forms import CustomerRegisterForm, OrganizerRegisterForm, AdminRegisterForm, LoginForm
 from django.db.models import Sum
 import uuid
@@ -207,6 +207,30 @@ def dashboard_view(request):
             events = Event.objects.filter(organizer_id=organizer.organizer_id)
             context['organizer_name'] = organizer.organizer_name
             context['active_events'] = events.count()
+            
+            from django.utils import timezone
+            now = timezone.now()
+            
+            tiket_terjual = Ticket.objects.filter(tcategory__tevent__organizer=organizer, torder__payment_status='Lunas').count()
+            revenue = Ticket.objects.filter(tcategory__tevent__organizer=organizer, torder__payment_status='Lunas').aggregate(total=Sum('tcategory__price'))['total'] or 0
+            venue_mitra = events.values('venue').distinct().count()
+            
+            context['tiket_terjual'] = tiket_terjual
+            context['revenue'] = revenue
+            context['venue_mitra'] = venue_mitra
+            
+            events_data = []
+            for event in events:
+                sold = Ticket.objects.filter(tcategory__tevent=event, torder__payment_status='Lunas').count()
+                quota = TicketCategory.objects.filter(tevent=event).aggregate(total=Sum('quota'))['total'] or 0
+                percent = int((sold / quota * 100)) if quota > 0 else 0
+                events_data.append({
+                    'event_title': event.event_title,
+                    'venue_name': event.venue.venue_name,
+                    'percent_sold': percent,
+                    'status': 'LIVE' if event.event_datetime > now else 'ENDED'
+                })
+            context['events_data'] = events_data
         
         # Data khusus untuk customer
         elif role_name == 'customer':
@@ -245,6 +269,8 @@ def dashboard_view(request):
         # Data khusus untuk admin
         elif role_name == 'admin':
             from django.db.models import Max
+            from datetime import datetime
+            now = datetime.now()
             
             # Hitung data infrastruktur venue
             venues = Venue.objects.all()
@@ -259,10 +285,75 @@ def dashboard_view(request):
             context['total_venues'] = total_venues
             context['max_capacity'] = max_capacity
             context['venues_with_reserved_seating'] = venues_with_reserved_seating
+            
+            context['total_pengguna'] = UserAccount.objects.count()
+            context['total_acara'] = Event.objects.filter(event_datetime__month=now.month, event_datetime__year=now.year).count()
+            context['omzet_platform'] = Order.objects.filter(payment_status='Lunas').aggregate(total=Sum('total_amount'))['total'] or 0
+            
+            active_promos = Promotion.objects.filter(start_date__lte=now.date(), end_date__gte=now.date())
+            context['promosi_aktif'] = active_promos.count()
+            context['promo_persentase'] = active_promos.filter(discount_type__icontains='Persen').count()
+            context['promo_nominal'] = active_promos.filter(discount_type__icontains='Nominal').count()
+            context['total_penggunaan_promo'] = OrderPromotion.objects.count()
         
         return render(request, 'dashboard.html', context)
         
     except UserAccount.DoesNotExist:
         request.session.flush()
-        messages.error(request, 'User tidak ditemukan!')
         return redirect('web:login')
+
+def profile_view(request):
+    """View untuk halaman Profil Saya"""
+    if not request.session.get('logged_in'):
+        messages.warning(request, 'Silakan login terlebih dahulu!')
+        return redirect('web:login')
+        
+    user_id = request.session.get('user_id')
+    user = UserAccount.objects.get(user_id=user_id)
+    role_name = request.session.get('role', 'customer')
+    
+    context = {
+        'user': user,
+        'role_name': role_name,
+        'page_title': 'Profil Saya'
+    }
+    
+    # Ambil data spesifik berdasarkan role
+    if role_name == 'customer':
+        profile_data = Customer.objects.get(user_id=user_id)
+        context['customer'] = profile_data
+    elif role_name == 'organizer':
+        profile_data = Organizer.objects.get(user_id=user_id)
+        context['organizer'] = profile_data
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'update_profile':
+            if role_name == 'customer':
+                profile_data.full_name = request.POST.get('full_name')
+                profile_data.phone_number = request.POST.get('phone_number')
+                profile_data.save()
+            elif role_name == 'organizer':
+                profile_data.organizer_name = request.POST.get('organizer_name')
+                profile_data.contact_email = request.POST.get('contact_email')
+                profile_data.save()
+            messages.success(request, 'Profil berhasil diupdate')
+            return redirect('web:profile')
+            
+        elif action == 'update_password':
+            old_password = request.POST.get('old_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if not verify_password(user.password, old_password):
+                messages.error(request, 'Password lama salah!')
+            elif new_password != confirm_password:
+                messages.error(request, 'Konfirmasi password baru tidak cocok!')
+            else:
+                user.password = new_password
+                user.save()
+                messages.success(request, 'Password berhasil diupdate')
+            return redirect('web:profile')
+            
+    return render(request, 'profile.html', context)
