@@ -39,7 +39,6 @@
             <div class="p-6 border-b border-slate-100 flex gap-4 items-center bg-white">
                 <div class="relative w-72">
                     <input type="text" placeholder="Cari ID {% if sess.role != 'customer' %}atau Pelanggan{% endif %}..." class="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-medium text-slate-600">
-                    <span class="absolute left-4 top-2.5 text-slate-400">🔍</span>
                 </div>
                 <select class="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 focus:outline-none focus:border-blue-500 cursor-pointer">
                     <option value="">Semua Status</option>
@@ -95,11 +94,8 @@
                         {% if sess.role == 'admin' %}
                         <td class="px-8 py-5 text-center">
                             <div class="flex justify-center gap-2 flex-wrap">
-                                <a href="#" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit Status">Edit</a>
-                                <form action="{% url 'fitur_biru:delete_order' order.order_id %}" method="POST" class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" onclick="return confirm('Yakin hapus order ini?')" title="Hapus Order">Hapus</button>
-                                </form>
+                                <button onclick="openEditOrderModal('{% url 'fitur_biru:update_order_status' order.order_id %}', '{{ order.order_id }}', '{{ order.payment_status }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Edit Status">Edit</button>
+                                <button onclick="openDeleteOrderModal('{% url 'fitur_biru:delete_order' order.order_id %}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Hapus Order">Hapus</button>
                             </div>
                         </td>
                         {% endif %}
@@ -113,5 +109,95 @@
             </table>
         </div>
     </div>
+
+    <!-- Edit Order Modal -->
+    <div id="editOrderModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex text-left whitespace-normal cursor-default">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-800">Edit Status Order</h2>
+                <button onclick="closeModal('editOrderModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+            </div>
+            
+            <form id="editOrderForm" action="" method="POST" class="p-6 space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Order ID</label>
+                    <input type="text" id="editOrderId" disabled class="w-full border border-slate-200 bg-slate-50 rounded-lg p-3 text-sm text-slate-500 font-mono outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Status Pembayaran</label>
+                    <select name="status" id="editOrderStatus" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                        <option value="Lunas">Lunas</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Dibatalkan">Dibatalkan</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('editOrderModal')" class="flex-1 py-3 border border-slate-200 rounded-lg text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Order Modal -->
+    <div id="deleteOrderModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="p-6 flex justify-between items-start">
+                <h2 class="text-xl font-bold text-red-600">Hapus Order</h2>
+                <button onclick="closeModal('deleteOrderModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+            </div>
+            
+            <div class="px-6 pb-6 text-sm text-slate-500">
+                Apakah Anda yakin ingin menghapus order ini? Tindakan ini tidak dapat dibatalkan.
+            </div>
+            
+            <div class="px-6 pb-6 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('deleteOrderModal')" class="px-5 py-2.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+                <form id="deleteOrderForm" action="" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.fixed.inset-0').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+        });
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openEditOrderModal(actionUrl, orderId, status) {
+            const form = document.getElementById('editOrderForm');
+            form.action = actionUrl;
+            
+            document.getElementById('editOrderId').value = orderId;
+            document.getElementById('editOrderStatus').value = status;
+            
+            openModal('editOrderModal');
+        }
+
+        function openDeleteOrderModal(actionUrl) {
+            const form = document.getElementById('deleteOrderForm');
+            form.action = actionUrl;
+            openModal('deleteOrderModal');
+        }
+    </script>
 </body>
 </html>

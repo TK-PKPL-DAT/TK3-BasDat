@@ -22,16 +22,33 @@ def get_session_data(request):
 def list_seat(request):
     role, _ = get_session_data(request)
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT s.seat_id, v.venue_name, s.section, s.row_number, s.seat_number,
-                   CASE WHEN hr.ticket_id IS NOT NULL THEN 'Terisi' ELSE 'Tersedia' END as status
-            FROM SEAT s
-            JOIN VENUE v ON s.venue_id = v.venue_id
-            LEFT JOIN HAS_RELATIONSHIP hr ON s.seat_id = hr.seat_id
-            ORDER BY v.venue_name, s.section, s.row_number, s.seat_number
-        """)
-        seats = cursor.fetchall()
-    return render(request, 'fitur_merah/list_seat.html', {'seats': seats, 'can_manage': role in ['admin', 'organizer']})
+        # cursor.execute("""
+        #     SELECT s.seat_id, v.venue_name, s.section, s.row_number, s.seat_number,
+        #            CASE WHEN hr.ticket_id IS NOT NULL THEN 'Terisi' ELSE 'Tersedia' END as status,
+        #            v.venue_id
+        #     FROM SEAT s
+        #     JOIN VENUE v ON s.venue_id = v.venue_id
+        #     LEFT JOIN HAS_RELATIONSHIP hr ON s.seat_id = hr.seat_id
+        #     ORDER BY v.venue_name, s.section, s.row_number, s.seat_number
+        # """)
+        # seats = cursor.fetchall()
+        cursor.execute("SELECT venue_id, venue_name FROM VENUE")
+        venues = cursor.fetchall()
+
+    # TODO: Sementara menggunakan data dummy agar tampilan tidak lambat (lemot)
+    import uuid
+    dummy_vid = venues[0][0] if venues else str(uuid.uuid4())
+    dummy_vname = venues[0][1] if venues else 'Gelora Bung Karno'
+    
+    seats = [
+        (str(uuid.uuid4()), dummy_vname, 'VIP', 'A', '01', 'Tersedia', dummy_vid),
+        (str(uuid.uuid4()), dummy_vname, 'VIP', 'A', '02', 'Terisi', dummy_vid),
+        (str(uuid.uuid4()), dummy_vname, 'Reguler', 'B', '15', 'Tersedia', dummy_vid),
+        (str(uuid.uuid4()), dummy_vname, 'Reguler', 'B', '16', 'Tersedia', dummy_vid),
+        (str(uuid.uuid4()), dummy_vname, 'Festival', 'F', '99', 'Terisi', dummy_vid)
+    ]
+
+    return render(request, 'fitur_merah/list_seat.html', {'seats': seats, 'venues': venues, 'can_manage': role in ['admin', 'organizer']})
 
 # CREATE SEAT 
 def create_seat(request):

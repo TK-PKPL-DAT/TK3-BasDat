@@ -17,9 +17,9 @@
                     <p class="text-slate-400 text-sm italic mt-2">Kelola kursi dan denah tempat duduk venue</p>
                 </div>
                 {% if can_manage %}
-                <a href="{% url 'fitur_merah:create_seat' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+                <button onclick="openModal('addSeatModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm whitespace-nowrap cursor-pointer">
                     + Tambah Kursi
-                </a>
+                </button>
                 {% endif %}
             </div>
 
@@ -73,7 +73,7 @@
                             {% if can_manage %}
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2 flex-wrap">
-                                    <a href="{% url 'fitur_merah:update_seat' s.0 %}" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">Edit</a>
+                                    <button onclick="openEditSeatModal('{% url 'fitur_merah:update_seat' s.0 %}', '{{ s.6|escapejs }}', '{{ s.2|escapejs }}', '{{ s.3|escapejs }}', '{{ s.4|escapejs }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Edit">Edit</button>
                                     <button onclick="openDeleteSeatModal('{% url 'fitur_merah:delete_seat' s.0 %}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Hapus">Hapus</button>
                                 </div>
                             </td>
@@ -82,6 +82,86 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Add Seat Modal -->
+        <div id="addSeatModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">Tambah Kursi</h2>
+                    <button onclick="closeModal('addSeatModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+                </div>
+                
+                <form action="{% url 'fitur_merah:create_seat' %}" method="POST" class="p-6 space-y-5">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Venue</label>
+                        <select name="venue_id" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                            <option value="">Pilih Venue...</option>
+                            {% for v in venues %}
+                                <option value="{{ v.0 }}">{{ v.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Section</label>
+                        <input type="text" name="section" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Baris</label>
+                        <input type="text" name="row" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">No. Kursi</label>
+                        <input type="text" name="number" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeModal('addSeatModal')" class="flex-1 py-3 border border-slate-200 rounded-lg text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer">Buat Kursi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Seat Modal (Global) -->
+        <div id="editSeatModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex text-left whitespace-normal cursor-default">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">Edit Kursi</h2>
+                    <button onclick="closeModal('editSeatModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+                </div>
+                
+                <form id="editSeatForm" action="" method="POST" class="p-6 space-y-5">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Venue</label>
+                        <select name="venue_id" id="editVenueSelect" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                            <option value="">Pilih Venue...</option>
+                            {% for v in venues %}
+                                <option value="{{ v.0 }}">{{ v.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Section</label>
+                        <input type="text" name="section" id="editSectionInput" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Baris</label>
+                        <input type="text" name="row" id="editRowInput" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">No. Kursi</label>
+                        <input type="text" name="number" id="editNumberInput" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeModal('editSeatModal')" class="flex-1 py-3 border border-slate-200 rounded-lg text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">Batal</button>
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer">Simpan</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -127,6 +207,18 @@
             function openDeleteSeatModal(deleteUrl) {
                 document.getElementById('confirmDeleteSeatBtn').href = deleteUrl;
                 openModal('deleteSeatModal');
+            }
+
+            function openEditSeatModal(actionUrl, venueId, section, row, number) {
+                const form = document.getElementById('editSeatForm');
+                form.action = actionUrl;
+                
+                document.getElementById('editVenueSelect').value = venueId;
+                document.getElementById('editSectionInput').value = section;
+                document.getElementById('editRowInput').value = row;
+                document.getElementById('editNumberInput').value = number;
+                
+                openModal('editSeatModal');
             }
         </script>
 </body>
