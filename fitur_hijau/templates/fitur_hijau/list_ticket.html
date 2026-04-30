@@ -94,12 +94,12 @@
                         
                         {% if can_manage %}
                         <td class="px-8 py-4 text-center">
-                            <div class="flex justify-center gap-4">
-                                <button onclick="openEditModal('{{ t.0 }}', '{{ t.1 }}', '{{ t.2 }}', '{{ t.3 }}')" class="text-slate-600 hover:text-blue-600 font-bold transition-all flex items-center gap-2">
-                                    ✏️ Edit
+                            <div class="flex justify-center gap-2">
+                                <button onclick="openEditModal('{{ t.0 }}', '{{ t.1 }}', '{{ t.2 }}', '{{ t.3 }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors">
+                                    Edit
                                 </button>
-                                <button onclick="openDeleteModal('{{ t.0 }}', '{{ t.1 }}')" class="text-slate-600 hover:text-red-600 font-bold transition-all flex items-center gap-2">
-                                    🗑️ Hapus
+                                <button onclick="openDeleteModal('{{ t.0 }}', '{{ t.1 }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors">
+                                    Hapus
                                 </button>
                             </div>
                         </td>

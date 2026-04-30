@@ -53,71 +53,96 @@
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Total Acara</p>
-                <p class="text-4xl font-black text-slate-800">{{ events|length }}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Tiket Tersedia</p>
-                <p class="text-4xl font-black text-slate-800">1.250</p> </div>
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-3">Kapasitas Venue</p>
-                <p class="text-4xl font-black text-blue-600">85%</p>
-            </div>
-        </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8">
-            <form method="GET" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px]">
-                    <input type="text" name="search" placeholder="Cari nama acara atau lokasi..." 
-                           class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg outline-none focus:border-blue-500 transition-all"
+
+        <div class="mb-8">
+            <form method="GET" class="flex flex-col md:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <input type="text" name="search" placeholder="Cari acara atau artis..." 
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm shadow-sm font-medium"
                            value="{{ search_query }}">
                 </div>
-                <div class="w-full md:w-auto">
-                    <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-3 rounded-lg font-bold transition-all">
-                        Cari Acara
-                    </button>
+                <div class="w-full md:w-48">
+                    <select name="venue" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm shadow-sm text-slate-600 font-medium" onchange="this.form.submit()">
+                        <option value="">Semua Venue</option>
+                        {% for venue in all_venues %}
+                        <option value="{{ venue.venue_id }}" {% if venue.venue_id|stringformat:"s" == venue_filter|stringformat:"s" %}selected{% endif %}>{{ venue.venue_name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+                <div class="w-full md:w-48">
+                    <select name="artist" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-all text-sm shadow-sm text-slate-600 font-medium" onchange="this.form.submit()">
+                        <option value="">Semua Artis</option>
+                        {% for artist in all_artists %}
+                        <option value="{{ artist.artist_id }}" {% if artist.artist_id|stringformat:"s" == artist_filter|stringformat:"s" %}selected{% endif %}>{{ artist.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="hidden">Cari</button>
             </form>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% if events %}
-                {% for event in events %}
-                <div class="event-card shadow-sm border border-slate-100 flex flex-col">
-                    <div class="h-48 bg-slate-200 flex items-center justify-center text-slate-400 text-5xl">
-                        🖼️
+            {% if events_data %}
+                {% for data in events_data %}
+                <div class="event-card shadow-sm border border-slate-100 flex flex-col bg-white rounded-xl overflow-hidden h-full">
+                    <div class="h-40 bg-blue-500 flex items-center justify-center text-5xl relative">
+                        🎵
+                        <button class="absolute top-3 right-3 bg-white/30 backdrop-blur-sm w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-red-500 shadow-sm transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        </button>
                     </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1 rounded-full uppercase">
-                                {{ event.event_category|default:"General" }}
+                    <div class="p-5 flex-1 flex flex-col">
+                        <h3 class="text-base font-bold text-slate-800 mb-2 leading-tight">{{ data.event.event_title }}</h3>
+                        
+                        <div class="flex flex-wrap gap-1.5 mb-4">
+                            {% for artist in data.artists %}
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-semibold border border-slate-200">
+                                {{ artist.name }}
                             </span>
-                            <span class="text-slate-400 text-xs font-medium">
-                                📅 {{ event.event_date }}
-                            </span>
+                            {% empty %}
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-semibold border border-slate-200">Various Artists</span>
+                            {% endfor %}
                         </div>
                         
-                        <h3 class="text-xl font-bold text-slate-800 mb-2">{{ event.event_name }}</h3>
-                        <p class="text-slate-500 text-sm mb-6 line-clamp-2">{{ event.description }}</p>
-                        
-                        <div class="mt-auto pt-6 border-t border-slate-50 flex justify-between items-center">
-                            <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Mulai Dari</p>
-                                <p class="text-lg font-black text-blue-600">Rp 150.000</p>
+                        <div class="space-y-1.5 mb-4">
+                            <div class="flex items-start text-slate-500 text-[11px] font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <span>{{ data.event.event_datetime|date:"Y-m-d - H:i" }}</span>
                             </div>
+                            <div class="flex items-start text-slate-500 text-[11px] font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <span class="line-clamp-1">{{ data.event.venue.venue_name }}, {{ data.event.venue.city }}</span>
+                            </div>
+                            <div class="flex items-start text-blue-600 font-bold text-[11px]">
+                                <span class="mr-1">$</span>
+                                <span>Mulai Rp {{ data.min_price|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1.5 mt-auto mb-4">
+                            {% for cat in data.categories %}
+                            <span class="bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                {{ cat.category_name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="flex flex-col gap-2">
+                            <button onclick="handleBuyTicket('{{ data.event.event_id }}')" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-all">
+                                Beli Tiket
+                            </button>
                             
+                            {% if request.session.role == 'admin' or request.session.role == 'organizer' %}
                             <div class="flex gap-2">
-                                {% if request.session.role == 'admin' or request.session.role == 'organizer' %}
-                                <button onclick="openEditModal('{{ event.event_id }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">
+                                <button onclick="openEditModal('{{ data.event.event_id }}')" class="flex-1 inline-flex justify-center items-center gap-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg font-bold text-xs transition-colors border border-amber-200">
                                     Edit
                                 </button>
-                                {% endif %}
-                                <button onclick="handleBuyTicket('{{ event.event_id }}')" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 transition-all">
-                                    Beli Tiket
-                                </button>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -132,18 +157,119 @@
     </div>
 
     <div id="createEventModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
-        <div class="bg-white rounded-[2rem] p-10 w-full max-w-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-4xl shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black text-slate-800">Tambah Acara Baru</h2>
+                <h2 class="text-2xl font-black text-slate-800" id="modalTitle">Tambah Acara Baru</h2>
                 <button onclick="closeModal('createEventModal')" class="text-slate-400 hover:text-slate-600">✕</button>
             </div>
+            
+            <form id="eventForm" class="space-y-6">
+                <input type="hidden" id="event_id" name="event_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Kolom Kiri -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">JUDUL ACARA</label>
+                            <input type="text" id="event_title" name="event_title" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" placeholder="cth. Konser Melodi Senja" required>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">TANGGAL (DATE)</label>
+                                <input type="date" id="event_date" name="event_date" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-slate-600" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">WAKTU (TIME)</label>
+                                <input type="time" id="event_time" name="event_time" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-slate-600" required>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">VENUE</label>
+                            <select id="venue_id" name="venue_id" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold" required>
+                                <option value="">Pilih Venue</option>
+                                {% for venue in all_venues %}
+                                <option value="{{ venue.venue_id }}">{{ venue.venue_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">ARTIS</label>
+                            <div class="flex flex-wrap gap-2 max-h-[150px] overflow-y-auto p-4 border-2 border-slate-100 rounded-2xl bg-slate-50">
+                                {% for artist in all_artists %}
+                                <label class="inline-flex items-center bg-white border border-slate-200 px-3 py-1 rounded-full cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all">
+                                    <input type="checkbox" name="artists" value="{{ artist.artist_id }}" class="mr-2 accent-blue-600 w-4 h-4">
+                                    <span class="text-sm font-bold text-slate-700">{{ artist.name }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">DESKRIPSI</label>
+                            <textarea id="description" name="description" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold text-slate-600 min-h-[120px]" placeholder="Deskripsi acara..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Kolom Kanan -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">KATEGORI TIKET</label>
+                            <div id="ticketCategoriesContainer" class="space-y-4">
+                                <!-- Kategori 1 (Default) -->
+                                <div class="ticket-category-item p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 relative">
+                                    <div class="grid grid-cols-1 gap-3 mb-3">
+                                        <input type="text" name="ticket_name[]" placeholder="Nama Kategori (cth: Regular)" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <input type="number" name="ticket_price[]" placeholder="Harga" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                                        <input type="number" name="ticket_quota[]" placeholder="Kuota" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" onclick="addTicketCategory()" class="mt-4 text-blue-600 font-bold text-sm hover:text-blue-800 flex items-center gap-1">
+                                <span>+</span> Tambah Kategori
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-8 pt-8 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('createEventModal')" class="flex-1 bg-white border-2 border-slate-200 text-slate-600 p-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Batal</button>
+                    <button type="submit" id="submitEventBtn" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">Buat Acara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div id="deleteEventModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl text-center">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Hapus Acara?</h2>
+            <p class="text-slate-500 mb-8">Tindakan ini tidak dapat dibatalkan. Semua data terkait acara ini akan terhapus.</p>
+            <div class="flex gap-4">
+                <button onclick="closeModal('deleteEventModal')" class="flex-1 bg-slate-100 text-slate-700 p-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">Batal</button>
+                <button id="confirmDeleteBtn" class="flex-1 bg-red-600 text-white p-4 rounded-2xl font-bold hover:bg-red-700 transition-all">Ya, Hapus</button>
             </div>
+        </div>
     </div>
 
     <script>
+        let currentEventIdToDelete = null;
+
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            if(id === 'createEventModal') {
+                document.getElementById('eventForm').reset();
+                document.getElementById('event_id').value = '';
+                document.getElementById('modalTitle').textContent = 'Tambah Acara Baru';
+                document.getElementById('submitEventBtn').textContent = 'Buat Acara';
+                resetTicketCategories();
+            }
         }
 
         function closeModal(id) {
@@ -154,6 +280,180 @@
         function handleBuyTicket(eventId) {
             window.location.href = `/fitur-biru/orders/create/?event_id=${eventId}`;
         }
+        
+        function openDeleteModal(eventId) {
+            currentEventIdToDelete = eventId;
+            document.getElementById('deleteEventModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if(!currentEventIdToDelete) return;
+            
+            const csrfToken = '{{ csrf_token }}';
+            try {
+                const response = await fetch(`/fitur-kuning/event/${currentEventIdToDelete}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    }
+                });
+                
+                const data = await response.json();
+                if(data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch(e) {
+                alert('Terjadi kesalahan saat menghapus acara');
+            }
+        });
+
+        function addTicketCategory(name='', price='', quota='') {
+            const container = document.getElementById('ticketCategoriesContainer');
+            const item = document.createElement('div');
+            item.className = 'ticket-category-item p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 relative mt-4';
+            item.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute -top-3 -right-3 bg-red-100 text-red-600 w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-red-200 shadow-sm">✕</button>
+                <div class="grid grid-cols-1 gap-3 mb-3">
+                    <input type="text" name="ticket_name[]" value="${name}" placeholder="Nama Kategori (cth: Regular)" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" name="ticket_price[]" value="${price}" placeholder="Harga" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                    <input type="number" name="ticket_quota[]" value="${quota}" placeholder="Kuota" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+
+        function resetTicketCategories() {
+            document.getElementById('ticketCategoriesContainer').innerHTML = `
+                <div class="ticket-category-item p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 relative">
+                    <div class="grid grid-cols-1 gap-3 mb-3">
+                        <input type="text" name="ticket_name[]" placeholder="Nama Kategori (cth: Regular)" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" name="ticket_price[]" placeholder="Harga" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                        <input type="number" name="ticket_quota[]" placeholder="Kuota" class="w-full bg-white border border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" required>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function openEditModal(eventId) {
+            try {
+                const response = await fetch(`/fitur-kuning/event/${eventId}/get/`);
+                const data = await response.json();
+                
+                if(data.success) {
+                    const event = data.event;
+                    document.getElementById('event_id').value = event.event_id;
+                    document.getElementById('event_title').value = event.event_title;
+                    
+                    document.getElementById('event_date').value = event.event_date; 
+                    document.getElementById('event_time').value = event.event_time;
+                    document.getElementById('venue_id').value = event.venue_id;
+                    
+                    // Reset and set artists
+                    document.querySelectorAll('input[name="artists"]').forEach(cb => cb.checked = false);
+                    data.artists.forEach(artistId => {
+                        const cb = document.querySelector(`input[name="artists"][value="${artistId}"]`);
+                        if(cb) cb.checked = true;
+                    });
+                    
+                    // Reset and set categories
+                    document.getElementById('ticketCategoriesContainer').innerHTML = '';
+                    if(data.categories.length === 0) {
+                        resetTicketCategories();
+                    } else {
+                        data.categories.forEach(cat => {
+                            addTicketCategory(cat.name, cat.price, cat.quota);
+                        });
+                        // Remove the delete button from the very first category to ensure at least one remains
+                        const firstCatBtn = document.querySelector('.ticket-category-item button');
+                        if(firstCatBtn) firstCatBtn.remove();
+                    }
+                    
+                    document.getElementById('modalTitle').textContent = 'Edit Acara';
+                    document.getElementById('submitEventBtn').textContent = 'Simpan Perubahan';
+                    
+                    document.getElementById('createEventModal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            } catch(e) {
+                alert('Gagal memuat data acara');
+            }
+        }
+        
+        document.getElementById('eventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitEventBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Menyimpan...';
+            btn.disabled = true;
+            
+            const eventId = document.getElementById('event_id').value;
+            const isEdit = !!eventId;
+            
+            const eventDateStr = document.getElementById('event_date').value;
+            const parts = eventDateStr.split('-');
+            const formattedDate = `${parts[1]}/${parts[2]}/${parts[0]}`;
+            
+            const artists = [];
+            document.querySelectorAll('input[name="artists"]:checked').forEach(cb => artists.push(cb.value));
+            
+            const categories = [];
+            const names = document.querySelectorAll('input[name="ticket_name[]"]');
+            const prices = document.querySelectorAll('input[name="ticket_price[]"]');
+            const quotas = document.querySelectorAll('input[name="ticket_quota[]"]');
+            
+            for(let i=0; i<names.length; i++) {
+                categories.push({
+                    name: names[i].value,
+                    price: prices[i].value,
+                    quota: quotas[i].value
+                });
+            }
+            
+            const payload = {
+                event_title: document.getElementById('event_title').value,
+                event_date: formattedDate,
+                event_time: document.getElementById('event_time').value,
+                venue_id: document.getElementById('venue_id').value,
+                description: document.getElementById('description').value || '',
+                artists: artists,
+                ticket_categories: categories
+            };
+            
+            const url = isEdit ? `/fitur-kuning/event/${eventId}/edit/` : `{% url 'fitur_kuning:create_event' %}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if(result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Terjadi kesalahan');
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                alert('Terjadi kesalahan jaringan');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

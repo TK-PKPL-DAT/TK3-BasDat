@@ -344,32 +344,7 @@ def event_list(request):
     return render(request, 'fitur_kuning/event_list.html', context)
 
 
-def event_detail(request, event_id):
-    """Menampilkan detail event"""
-    event = get_object_or_404(Event, event_id=event_id)
-    
-    # RAW SQL: Ambil daftar artis
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT a.artist_id, a.name, a.genre 
-            FROM artist a 
-            JOIN event_artist ea ON a.artist_id = ea.artist_id 
-            WHERE ea.event_id = %s
-        """, [str(event.event_id)])
-        artists_list = [Artist(artist_id=row[0], name=row[1], genre=row[2]) for row in cursor.fetchall()]
-    
-    ticket_categories = TicketCategory.objects.filter(tevent=event)
-    
-    context = {
-        'event': event,
-        'artists': artists_list,
-        'categories': ticket_categories,
-        'is_admin_or_organizer': is_admin_or_organizer(request),
-        'user_role': get_user_role(request),
-        'is_logged_in': request.session.get('logged_in', False),
-    }
-    
-    return render(request, 'fitur_kuning/event_detail.html', context)
+
 
 
 @require_http_methods(["POST"])
@@ -397,7 +372,7 @@ def create_event(request):
         event_datetime = datetime.strptime(event_datetime_str, '%m/%d/%Y %H:%M')
         
         user_id = request.session.get('user_id')
-        user_role = request.session.get('role')
+        user_role = get_user_role(request)
         
         # Untuk admin, buat/ambil organizer default. Untuk organizer, ambil dari DB
         if user_role == 'admin':
@@ -554,3 +529,26 @@ def edit_event(request, event_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)
+
+
+@require_http_methods(["POST"])
+def delete_event(request, event_id):
+    """Delete event untuk admin dan organizer"""
+    if not is_admin_or_organizer(request):
+        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+    
+    try:
+        event = get_object_or_404(Event, event_id=event_id)
+        
+        # Hapus relasi artist terlebih dahulu
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM event_artist WHERE event_id = %s", [str(event.event_id)])
+            
+        event.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Event berhasil dihapus!'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)
