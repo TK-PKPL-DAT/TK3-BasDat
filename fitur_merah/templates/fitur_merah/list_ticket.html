@@ -31,9 +31,9 @@
                 {% endif %}
 
                 {% if is_admin or role == 'organizer' %}
-                <a href="{% url 'fitur_merah:create_ticket' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                <button onclick="openModal('addTicketModal')" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2 cursor-pointer">
                     <span>+</span> Tambah Tiket
-                </a>
+                </button>
                 {% endif %}
             </div>
             
@@ -96,8 +96,50 @@
 
                         {% if is_admin %}
                         <div class="mt-6 flex gap-3">
-                            <a href="{% url 'fitur_merah:update_ticket' t.0 %}" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors" title="Edit">Edit</a>
-                            <a href="{% url 'fitur_merah:delete_ticket' t.0 %}" onclick="return confirm('Apakah Anda yakin ingin menghapus tiket ini?')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors" title="Hapus">Hapus</a>
+                            <button onclick="openModal('editTicketModal-{{ t.0 }}')" class="inline-flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Edit">Edit</button>
+                            <button onclick="openDeleteModal('{% url 'fitur_merah:delete_ticket' t.0 %}')" class="inline-flex items-center gap-1 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold text-xs transition-colors cursor-pointer" title="Hapus">Hapus</button>
+                        </div>
+
+                        <!-- Edit Ticket Modal (Specific for this ticket) -->
+                        <div id="editTicketModal-{{ t.0 }}" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex">
+                            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden text-left">
+                                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                                    <h2 class="text-lg font-bold text-slate-800">Edit Tiket</h2>
+                                    <button onclick="closeModal('editTicketModal-{{ t.0 }}')" class="text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+                                
+                                <form action="{% url 'fitur_merah:update_ticket' t.0 %}" method="POST" class="p-6 space-y-5">
+                                    {% csrf_token %}
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Kode Tiket</label>
+                                        <input type="text" disabled value="{{ t.1 }}" class="w-full border border-slate-200 bg-slate-50 rounded-lg p-3 text-sm text-slate-500 font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Status</label>
+                                        <select name="status" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                                            <option value="valid">Valid</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Kursi <span class="text-slate-400 lowercase normal-case">(opsional)</span></label>
+                                        <select name="seat_id" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                                            <option value="">Tanpa Kursi</option>
+                                            {% if t.6 %}
+                                                <option value="{{ t.6 }}" selected>{{ t.7 }} — Baris {{ t.8 }}, No. {{ t.5 }} (Saat Ini)</option>
+                                            {% endif %}
+                                            {% for s in seats %}
+                                                <option value="{{ s.0 }}">{{ s.1 }} — Baris {{ s.2 }}, No. {{ s.3 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="flex gap-3 pt-4">
+                                        <button type="button" onclick="closeModal('editTicketModal-{{ t.0 }}')" class="flex-1 py-3 border border-slate-200 rounded-lg text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
+                                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">Simpan</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                         {% endif %}
                     </div>
@@ -114,5 +156,107 @@
                 {% endfor %}
             </div>
         </div>
+
+        <!-- Add Ticket Modal -->
+        <div id="addTicketModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-800">Tambah Tiket</h2>
+                    <button onclick="closeModal('addTicketModal')" class="text-slate-400 hover:text-slate-600">✕</button>
+                </div>
+                
+                <form action="{% url 'fitur_merah:create_ticket' %}" method="POST" class="p-6 space-y-5">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Order</label>
+                        <select name="order_id" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                            <option value="">Pilih Order...</option>
+                            {% for o in orders %}
+                                <option value="{{ o.0 }}">{{ o.0 }} - {{ o.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Kategori Tiket</label>
+                        <select name="category_id" required class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                            <option value="">Pilih Kategori...</option>
+                            {% for c in categories %}
+                                <option value="{{ c.0 }}">{{ c.1 }} - Rp {{ c.2|floatformat:0 }} ({{ c.3 }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Kursi <span class="text-slate-400 lowercase normal-case">(opsional)</span></label>
+                        <select name="seat_id" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none focus:border-blue-500 bg-white">
+                            <option value="">Tanpa Kursi</option>
+                            {% for s in seats %}
+                                <option value="{{ s.0 }}">{{ s.1 }} — Baris {{ s.2 }}, No. {{ s.3 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Kode Tiket</label>
+                        <input type="text" disabled placeholder="Auto-generate saat dibuat" class="w-full bg-slate-50 border border-slate-100 rounded-lg p-3 text-sm text-slate-400 font-mono">
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeModal('addTicketModal')" class="flex-1 py-3 border border-slate-200 rounded-lg text-center font-medium text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">Buat Tiket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Delete Ticket Modal -->
+        <div id="deleteTicketModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50 flex">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+                <div class="p-6 flex justify-between items-start">
+                    <h2 class="text-xl font-bold text-red-600">Hapus Tiket</h2>
+                    <button onclick="closeModal('deleteTicketModal')" class="text-slate-400 hover:text-slate-600">✕</button>
+                </div>
+                
+                <div class="px-6 pb-6 text-sm text-slate-500">
+                    Apakah Anda yakin ingin menghapus tiket ini? Relasi kursi akan dilepaskan. Tindakan ini tidak dapat dibatalkan.
+                </div>
+                
+                <div class="px-6 pb-6 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('deleteTicketModal')" class="px-5 py-2.5 border border-slate-200 rounded-lg font-medium text-slate-700 hover:bg-slate-50 transition-colors">Batal</button>
+                    <a id="confirmDeleteTicketBtn" href="#" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Hapus</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Ensure modals are hidden on load instead of flex
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.fixed.inset-0').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                });
+            });
+
+            function openModal(id) {
+                const modal = document.getElementById(id);
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeModal(id) {
+                const modal = document.getElementById(id);
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+
+
+            function openDeleteModal(deleteUrl) {
+                document.getElementById('confirmDeleteTicketBtn').href = deleteUrl;
+                openModal('deleteTicketModal');
+            }
+        </script>
 </body>
 </html>

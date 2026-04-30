@@ -93,7 +93,7 @@ def list_ticket(request):
         messages.warning(request, "Silakan login untuk melihat tiket Anda.")
         return redirect('web:login')
     query = """
-        SELECT t.ticket_id, t.ticket_code, c.full_name, e.event_title, tc.category_name, s.seat_number
+        SELECT t.ticket_id, t.ticket_code, c.full_name, e.event_title, tc.category_name, s.seat_number, s.seat_id, s.section, s.row_number
         FROM TICKET t
         JOIN "ORDER" o ON t.torder_id = o.order_id
         JOIN CUSTOMER c ON o.customer_id = c.customer_id
@@ -112,10 +112,47 @@ def list_ticket(request):
     with connection.cursor() as cursor:
         cursor.execute(query, params)
         tickets = cursor.fetchall()
+    orders = []
+    categories = []
+    seats = []
+    if role in ['admin', 'organizer']:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT o.order_id, c.full_name FROM "ORDER" o 
+                JOIN CUSTOMER c ON o.customer_id = c.customer_id
+            """)
+            orders = cursor.fetchall()
+            cursor.execute("""
+                SELECT tc.category_id, tc.category_name, tc.price, e.event_title 
+                FROM TICKET_CATEGORY tc 
+                JOIN EVENT e ON tc.tevent_id = e.event_id
+            """)
+            categories = cursor.fetchall()
+            # cursor.execute("""
+            #     SELECT s.seat_id, s.section, s.row_number, s.seat_number 
+            #     FROM SEAT s 
+            #     LEFT JOIN HAS_RELATIONSHIP hr ON s.seat_id = hr.seat_id 
+            #     WHERE hr.ticket_id IS NULL
+            # """)
+            # seats = cursor.fetchall()
+            
+            # TODO: Sementara menggunakan data dummy sesuai permintaan
+            import uuid
+            seats = [
+                (str(uuid.uuid4()), 'VIP', 'A', '01'),
+                (str(uuid.uuid4()), 'VIP', 'A', '02'),
+                (str(uuid.uuid4()), 'Reguler', 'B', '15'),
+                (str(uuid.uuid4()), 'Reguler', 'B', '16'),
+                (str(uuid.uuid4()), 'Festival', 'F', '99')
+            ]
+
     return render(request, 'fitur_merah/list_ticket.html', {
         'tickets': tickets, 
         'role': role, 
-        'is_admin': role == 'admin'
+        'is_admin': role == 'admin',
+        'orders': orders,
+        'categories': categories,
+        'seats': seats
     })
 
 # CREATE TIKET
